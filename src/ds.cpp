@@ -21,7 +21,6 @@ Graph::Graph(const std::string filename) {
         nodes.insert(from_node);
         nodes.insert(to_node);
         edges[from_node].insert(to_node);
-        edges.try_emplace(to_node);
     }
 
     infile.close();
@@ -30,6 +29,10 @@ Graph::Graph(const std::string filename) {
     if (nodes.size() > 0) {
         const auto max_element = std::max_element(std::cbegin(nodes), std::cend(nodes));
         n = *max_element + 1;
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+        edges.try_emplace(i);
     }
 }
 
