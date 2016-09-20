@@ -9,6 +9,7 @@
 
 
 struct Graph {
+    size_t n;
     std::set<uint_fast32_t> nodes;
     std::map<uint_fast32_t, std::set<uint_fast32_t>> edges;
 
@@ -17,6 +18,7 @@ struct Graph {
 
 
 struct CSR {
+    size_t n;
     std::vector<float> a;
     std::vector<uint_fast32_t> ia, ja;
 

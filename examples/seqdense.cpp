@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -13,8 +12,7 @@
 
 std::map<uint_fast32_t, float> rank(const Graph& graph) {
     // initialization
-    const auto max_element = std::max_element(std::cbegin(graph.nodes), std::cend(graph.nodes));
-    const auto n = *max_element + 1;
+    const auto n = graph.n;
 
     const auto d = 0.85f;
 

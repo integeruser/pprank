@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -24,10 +25,18 @@ Graph::Graph(const std::string filename) {
     }
 
     infile.close();
+
+    n = 0;
+    if (nodes.size() > 0) {
+        const auto max_element = std::max_element(std::cbegin(nodes), std::cend(nodes));
+        n = *max_element + 1;
+    }
 }
 
 
 CSR::CSR(const Graph& graph) {
+    n = graph.n;
+
     ia.push_back(0);
 
     size_t edge_count = 0;
@@ -52,8 +61,8 @@ CSR::CSR(const Graph& graph) {
 CSR::CSR(const std::string filename) {
     std::ifstream infile(filename, std::ios::in | std::ios::binary);
 
-    ssize_t a_size, ia_size, ja_size;
-    std::sscanf(filename.c_str(), "CSR-%zd-%zd-%zd.bin", &a_size, &ia_size, &ja_size);
+    size_t a_size, ia_size, ja_size;
+    std::sscanf(filename.c_str(), "CSR-%zd-%zd-%zd-%zd.bin", &n, &a_size, &ia_size, &ja_size);
 
     a.resize(a_size);
     infile.read(reinterpret_cast<char*>( &a[0]),  a_size * sizeof(float));
@@ -67,7 +76,7 @@ CSR::CSR(const std::string filename) {
 
 void CSR::to_file() {
     std::stringstream filename;
-    filename << "CSR-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";
+    filename << "CSR-" << n << "-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";
 
     std::ofstream outfile(filename.str(), std::ios::out | std::ios::binary);
 
