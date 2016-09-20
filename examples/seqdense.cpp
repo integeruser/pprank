@@ -20,17 +20,17 @@ std::map<uint_fast32_t, float> rank(const Graph& graph) {
     p.fill(1.0f/n);
 
     arma::mat A(n, n);
-    for (const auto from_node: graph.nodes) {
-        const auto out_links_count = graph.edges.at(from_node).size();
-        if (out_links_count == 0) {
+    for (size_t i = 0; i < n; ++i) {
+        const auto outdegree = graph.edges.at(i).size();
+        if (outdegree == 0) {
             // dangling node
-            for (const auto to_node: graph.nodes) {
-                A(from_node, to_node) = 1.0f/n;
+            for (size_t j = 0; j < n; ++j) {
+                A(i, j) = 1.0f/n;
             }
         }
         else {
-            for (const auto to_node: graph.edges.at(from_node)) {
-                A(from_node, to_node) = 1.0f/out_links_count;
+            for (const auto j: graph.edges.at(i)) {
+                A(i, j) = 1.0f/outdegree;
             }
         }
     }
