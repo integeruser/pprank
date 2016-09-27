@@ -1,3 +1,7 @@
+csrvecmul:
+	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
+	src/ds.cpp examples/csrvecmul.cpp -o csrvecmul
+
 seqdense:
 	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
 	src/ds.cpp examples/seqdense.cpp -o seqdense
