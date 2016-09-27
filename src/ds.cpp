@@ -46,9 +46,11 @@ CSR::CSR(const Graph& graph) {
     for (const auto& from_node: graph.nodes) {
         const auto& edges = graph.edges.at(from_node);
 
+        const auto outdegree = edges.size();
+        const auto value = 1.0f/outdegree;
         for (const auto& to_node: graph.nodes) {
             if (std::find(edges.cbegin(), edges.cend(), to_node) != edges.cend()) {
-                a.push_back(1.0f);
+                a.push_back(value);
                 ++edge_count;
                 ja.push_back(to_node);
             }
