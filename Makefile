@@ -1,3 +1,7 @@
+csrsplit:
+	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
+	src/ds.cpp examples/csrsplit.cpp -o csrsplit
+
 csrvecmul:
 	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
 	src/ds.cpp examples/csrvecmul.cpp -o csrvecmul
@@ -14,4 +18,4 @@ simd:
 	gcc-6 -Wall -O3 -std=c11 -msse4.1 examples/simd.c -o simd
 
 clean:
-	rm -f csrvecmul seqdense seqdense-notranspose simd
+	rm -f csrsplit csrvecmul seqdense seqdense-notranspose simd

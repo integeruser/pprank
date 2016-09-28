@@ -37,6 +37,9 @@ Graph::Graph(const std::string filename) {
 }
 
 
+CSR::CSR() {
+}
+
 CSR::CSR(const Graph& graph) {
     n = graph.n;
 

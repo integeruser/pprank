@@ -22,6 +22,7 @@ struct CSR {
     std::vector<float> a;
     std::vector<uint_fast32_t> ia, ja;
 
+    CSR();
     CSR(const Graph& graph);
     CSR(const std::string filename);
 
