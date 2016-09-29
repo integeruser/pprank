@@ -37,11 +37,9 @@ Graph::Graph(const std::string filename) {
 }
 
 
-CSR::CSR() {
-}
-
 CSR::CSR(const Graph& graph) {
-    n = graph.n;
+    n_rows = graph.nodes.size();
+    n_cols = graph.nodes.size();
 
     ia.push_back(0);
 
@@ -67,7 +65,7 @@ CSR::CSR(const std::string filename) {
     std::ifstream infile(filename, std::ios::in | std::ios::binary);
 
     size_t a_size, ia_size, ja_size;
-    std::sscanf(filename.c_str(), "CSR-%zd-%zd-%zd-%zd.bin", &n, &a_size, &ia_size, &ja_size);
+    std::sscanf(filename.c_str(), "CSR-%zd-%zd-%zd-%zd.bin", &n_rows, &a_size, &ia_size, &ja_size);
 
     a.resize(a_size);
     infile.read(reinterpret_cast<char*>( &a[0]),  a_size * sizeof(float));
@@ -77,6 +75,9 @@ CSR::CSR(const std::string filename) {
     infile.read(reinterpret_cast<char*>(&ja[0]), ja_size * sizeof(uint_fast32_t));
 
     infile.close();
+
+    n_rows = 0;
+    n_cols = 0;
 }
 
 CSR::CSR(const arma::mat& matrix) {
@@ -120,7 +121,7 @@ arma::vec CSR::operator*(const arma::vec& vec) {
 
 void CSR::to_file() {
     std::stringstream filename;
-    filename << "CSR-" << n << "-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";
+    filename << "CSR-" << n_rows << "-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";
 
     std::ofstream outfile(filename.str(), std::ios::out | std::ios::binary);
 
