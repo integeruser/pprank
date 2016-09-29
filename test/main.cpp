@@ -16,7 +16,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(0) = -42.42;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = CSR(A).mul(b);
+        const auto x2 = CSR(A)*b;
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-5));
     }
 
@@ -38,7 +38,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(2) = -42.42;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = CSR(A).mul(b);
+        const auto x2 = CSR(A)*b;
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-5));
     }
 
@@ -60,7 +60,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(3) = 3.14;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = CSR(A).mul(b);
+        const auto x2 = CSR(A)*b;
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-3));
     }
 }
