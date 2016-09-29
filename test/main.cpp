@@ -7,6 +7,60 @@
 #include "prettyprint.hpp"
 
 
+TEST_CASE( "sparse matrix-vector construction" ) {
+    SECTION( "from matrix" ) {
+        SECTION( "1x3" ) {
+            arma::mat A(1, 3);
+            A(0, 0) = 3.14;
+            A(0, 1) = 0;
+            A(0, 2) = 1337;
+
+            const auto csr = CSR(A);
+
+            REQUIRE(csr.n_rows == A.n_rows);
+            REQUIRE(csr.n_cols == A.n_cols);
+            REQUIRE(csr.a == ((const std::vector<float>){3.14f, 1337.0f}));
+            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 2}));
+            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){0, 2}));
+        }
+
+        SECTION( "3x3" ) {
+            arma::mat A(3, 3);
+            A(0, 0) = 1;
+            A(0, 1) = 0;
+            A(0, 2) = 1337;
+            A(1, 0) = 0;
+            A(1, 1) = 0;
+            A(1, 2) = 1;
+            A(2, 0) = 0;
+            A(2, 1) = 42;
+            A(2, 2) = 0;
+
+            const auto csr = CSR(A);
+
+            REQUIRE(csr.n_rows == A.n_rows);
+            REQUIRE(csr.n_cols == A.n_cols);
+            REQUIRE(csr.a == ((const std::vector<float>){1.0f, 1337.0f, 1.0f, 42.0f}));
+            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 2, 3, 4}));
+            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){0, 2, 2, 1}));
+        }
+    }
+
+    SECTION( "from graph" ) {
+        SECTION( "simple.txt" ) {
+            const auto graph = Graph("inputs/simple.txt");
+
+            const auto csr = CSR(graph);
+
+            REQUIRE(csr.n_rows == graph.nodes.size());
+            REQUIRE(csr.n_cols == graph.nodes.size());
+            REQUIRE(csr.a == ((const std::vector<float>){1.0f, 1.0f}));
+            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 1, 2, 2}));
+            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){1, 2}));
+        }
+    }
+}
+
 TEST_CASE( "sparse matrix-vector multiplication" ) {
     SECTION( "1x1 matrix times 1x1 vector" ) {
         arma::mat A(1, 1);
