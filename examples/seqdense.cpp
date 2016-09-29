@@ -12,7 +12,7 @@
 
 std::map<uint_fast32_t, float> rank(const Graph& graph) {
     // initialization
-    const auto n = graph.n;
+    const auto n = graph.nodes.size();
 
     const auto d = 0.85f;
 

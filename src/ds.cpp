@@ -25,7 +25,7 @@ Graph::Graph(const std::string filename) {
 
     infile.close();
 
-    n = 0;
+    size_t n = 0;
     if (nodes.size() > 0) {
         const auto max_element = std::max_element(std::cbegin(nodes), std::cend(nodes));
         n = *max_element + 1;
