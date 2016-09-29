@@ -6,11 +6,6 @@
 #include "armadillo"
 #include "prettyprint.hpp"
 
-#include <cassert>
-
-
-extern arma::vec mul(const CSR&, const arma::vec&, size_t);
-
 
 TEST_CASE( "sparse matrix-vector multiplication" ) {
     SECTION( "1x1 matrix times 1x1 vector" ) {
@@ -21,7 +16,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(0) = -42.42;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = mul(CSR(A), b, b.size());
+        const auto x2 = CSR(A).mul(b);
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-5));
     }
 
@@ -43,7 +38,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(2) = -42.42;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = mul(CSR(A), b, b.size());
+        const auto x2 = CSR(A).mul(b);
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-5));
     }
 
@@ -65,7 +60,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(3) = 3.14;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = mul(CSR(A), b, b.size());
+        const auto x2 = CSR(A).mul(b);
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-3));
     }
 }

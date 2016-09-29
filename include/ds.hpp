@@ -30,6 +30,8 @@ struct CSR {
     CSR(const std::string filename);
     CSR(const arma::mat&);
 
+    arma::vec mul(const arma::vec&);
+
     void to_file();
 };
 

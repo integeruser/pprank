@@ -100,6 +100,24 @@ CSR::CSR(const arma::mat& matrix) {
     n_cols = matrix.n_cols;
 }
 
+arma::vec CSR::mul(const arma::vec& b) {
+    // see http://www.mathcs.emory.edu/~cheung/Courses/561/Syllabus/3-C/sparse.html
+    arma::vec x = arma::zeros<arma::vec>(n_rows);
+    for (size_t i = 0; i < n_rows; ++i) {
+        if (ia[i] == ia[i+1]) {
+            // for (size_t k = 0; k < n; ++k) {
+            //     x[i] += (1.0f/n) * b[k];
+            // }
+        }
+        else {
+            for (size_t k = ia[i]; k < ia[i+1]; ++k) {
+                x[i] = x[i] + a[k] * b[ja[k]];
+            }
+        }
+    }
+    return x;
+}
+
 void CSR::to_file() {
     std::stringstream filename;
     filename << "CSR-" << n << "-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";
