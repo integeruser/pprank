@@ -12,7 +12,7 @@
 
 std::map<uint_fast32_t, float> rank(const Graph& graph) {
     // initialization
-    const auto n = graph.nodes.size();
+    const auto n = graph.edges.size();
 
     const auto d = 0.85f;
 
@@ -65,7 +65,6 @@ int main(int argc, char const *argv[]) {
 
     const auto filename = argv[1];
     const auto graph = Graph(filename);
-    std::cout << "Nodes: " << graph.nodes << std::endl;
     std::cout << "Edges: " << graph.edges << std::endl;
 
     const auto ranks = rank(graph);
