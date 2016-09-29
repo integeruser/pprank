@@ -19,6 +19,7 @@ struct Graph {
 
 struct CSR {
     size_t n;
+    size_t n_rows, n_cols;
     std::vector<float> a;
     std::vector<uint_fast32_t> ia, ja;
 

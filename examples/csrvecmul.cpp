@@ -39,12 +39,12 @@ arma::vec mul(const CSR& A, const arma::vec& b, size_t n) {
 
     // see http://www.mathcs.emory.edu/~cheung/Courses/561/Syllabus/3-C/sparse.html
 
-    auto x = arma::vec(n);
-    for (size_t i = 0; i < n; ++i) {
+    arma::vec x = arma::zeros<arma::vec>(A.n_rows);
+    for (size_t i = 0; i < A.n_rows; ++i) {
         if (A.ia[i] == A.ia[i+1]) {
-            for (size_t k = 0; k < n; ++k) {
-                x[i] += (1.0f/n) * b[k];
-            }
+            // for (size_t k = 0; k < n; ++k) {
+            //     x[i] += (1.0f/n) * b[k];
+            // }
         }
         else {
             for (size_t k = A.ia[i]; k < A.ia[i+1]; ++k) {
