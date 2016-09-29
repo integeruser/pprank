@@ -52,8 +52,8 @@ TEST_CASE( "sparse matrix-vector construction" ) {
 
             const auto csr = CSR(graph);
 
-            REQUIRE(csr.n_rows == graph.nodes.size());
-            REQUIRE(csr.n_cols == graph.nodes.size());
+            REQUIRE(csr.n_rows == graph.edges.size());
+            REQUIRE(csr.n_cols == graph.edges.size());
             REQUIRE(csr.a == ((const std::vector<float>){1.0f, 1.0f}));
             REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 1, 2, 2}));
             REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){1, 2}));

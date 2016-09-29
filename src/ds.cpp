@@ -10,30 +10,24 @@
 
 
 Graph::Graph(const std::string filename) {
+    // assume the file contains two integers per line, separated by a whitespace
+    // each line represent an edge from a source node to a destination node
     std::ifstream infile(filename, std::ios::in);
 
+    uint_fast32_t node_count = 0;
     std::string line;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         uint_fast32_t from_node, to_node;
         if (!(iss >> from_node >> to_node)) continue;
 
-        nodes.insert(from_node);
-        nodes.insert(to_node);
         edges[from_node].insert(to_node);
+        node_count = 1 + std::max(std::max(from_node, to_node), node_count);
     }
 
     infile.close();
 
-    size_t n = 0;
-    if (nodes.size() > 0) {
-        const auto max_element = std::max_element(std::cbegin(nodes), std::cend(nodes));
-        n = *max_element + 1;
-    }
-
-    for (size_t i = 0; i < n; ++i) {
-        edges.try_emplace(i);
-    }
+    for (size_t i = 0; i < node_count; ++i) edges.try_emplace(i);
 }
 
 
@@ -59,14 +53,14 @@ CSR::CSR(const arma::mat& matrix) {
 }
 
 CSR::CSR(const Graph& graph) {
-    n_rows = graph.nodes.size();
-    n_cols = graph.nodes.size();
+    n_rows = graph.edges.size();
+    n_cols = graph.edges.size();
 
     ia.push_back(0);
 
     size_t edge_count = 0;
-    for (const auto from_node: graph.nodes) {
-        const auto& neighbors = graph.edges.at(from_node);
+    for (const auto& pair: graph.edges) {
+        const auto& neighbors = pair.second;
 
         for (const auto to_node: neighbors) {
             const float weight = 1.0f;
@@ -79,7 +73,7 @@ CSR::CSR(const Graph& graph) {
     }
 
     assert(a.size() == ja.size());
-    assert(ia.size() == graph.nodes.size()+1);
+    assert(ia.size() == graph.edges.size()+1);
 }
 
 CSR::CSR(const std::string& filename) {

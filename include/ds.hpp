@@ -11,7 +11,6 @@
 
 
 struct Graph {
-    std::set<uint_fast32_t> nodes;
     std::map<uint_fast32_t, std::set<uint_fast32_t>> edges;
 
     Graph(const std::string filename);
