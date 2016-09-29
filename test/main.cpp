@@ -64,3 +64,46 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-3));
     }
 }
+
+TEST_CASE( "sparse matrix splitting" ) {
+    SECTION( "split 1x1 matrix into 1 submatrix" ) {
+        arma::mat A(1, 1);
+        A(0, 0) = 1337;
+
+        const auto csr = CSR(A);
+
+        const auto split = csr.split(1);
+
+        REQUIRE(split.size() == 1);
+
+        REQUIRE(split[0].a == ((const std::vector<float>){1337.0f}));
+        REQUIRE(split[0].ia == ((const std::vector<uint_fast32_t>){0, 1}));
+        REQUIRE(split[0].ja == ((const std::vector<uint_fast32_t>){0}));
+    }
+
+    SECTION( "split 2x2 matrix into 2 submatrices" ) {
+        arma::mat A(2, 4);
+        A(0, 0) = 1;
+        A(0, 1) = 0;
+        A(0, 2) = 1337;
+        A(0, 3) = 0;
+        A(1, 0) = 42.42;
+        A(1, 1) = -31337;
+        A(1, 2) = 3.14;
+        A(1, 3) = 0;
+
+        const auto csr = CSR(A);
+
+        const auto split = csr.split(2);
+
+        REQUIRE(split.size() == 2);
+
+        REQUIRE(split[0].a == ((const std::vector<float>){1.0f, 1337.0f}));
+        REQUIRE(split[0].ia == ((const std::vector<uint_fast32_t>){0, 2}));
+        REQUIRE(split[0].ja == ((const std::vector<uint_fast32_t>){0, 2}));
+
+        REQUIRE(split[1].a == ((const std::vector<float>){42.42f, -31337.0f, 3.14f}));
+        REQUIRE(split[1].ia == ((const std::vector<uint_fast32_t>){0, 3}));
+        REQUIRE(split[1].ja == ((const std::vector<uint_fast32_t>){0, 1, 2}));
+    }
+}

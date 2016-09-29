@@ -120,6 +120,43 @@ arma::vec CSR::operator*(const arma::vec& vec) {
     return x;
 }
 
+std::vector<CSR> CSR::split(size_t n) const {
+    const size_t rows = ia.size()-1;
+    assert(0 < n and n <= rows);
+
+    // compute maximum size of each submatrix
+    // note that the last submatrix can have a smaller size than the others
+    const size_t size = ceil(float(rows)/n);
+
+    std::vector<CSR> csrs;
+    size_t i = 1, j = 0;
+    size_t offset = 0;
+    do {
+        auto subcsr = CSR();
+
+        subcsr.ia.push_back(0);
+        for (size_t k = 0; i < ia.size() && k < size; ++k) {
+            subcsr.ia.push_back(ia[i] - offset);
+            ++i;
+        }
+        offset += subcsr.ia.back();
+        assert(((csrs.size() < n-1) and subcsr.ia.size() == size+1) or
+             ((csrs.size() == n-1) and subcsr.ia.size() <= size+1));
+
+        for (size_t k = 0; k < subcsr.ia.back(); ++k) {
+            subcsr.a.push_back(a[j]);
+            subcsr.ja.push_back(ja[j]);
+            ++j;
+        }
+
+        csrs.push_back(subcsr);
+    } while (csrs.size() < n);
+
+    assert(i == ia.size());
+    assert(j == a.size() and j == ja.size());
+    return csrs;
+}
+
 void CSR::to_file() {
     std::stringstream filename;
     filename << "CSR-" << n_rows << "-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";

@@ -25,11 +25,14 @@ struct CSR {
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
 
+    CSR() {};
     CSR(const arma::mat&);
     CSR(const Graph&);
     CSR(const std::string&);
 
     arma::vec operator*(const arma::vec&);
+
+    std::vector<CSR> split(size_t) const;
 
     void to_file();
 };

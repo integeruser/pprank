@@ -20,4 +20,4 @@ tests:
 
 
 clean:
-	rm -f csrsplit seqdense seqdense-notranspose simd
+	rm -f seqdense seqdense-notranspose simd
