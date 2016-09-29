@@ -79,6 +79,27 @@ CSR::CSR(const std::string filename) {
     infile.close();
 }
 
+CSR::CSR(const arma::mat& matrix) {
+    ia.push_back(0);
+
+    size_t nonzero = 0;
+    for (size_t i = 0; i < matrix.n_rows; ++i) {
+        for (size_t j = 0; j < matrix.n_cols; ++j) {
+            if (matrix(i, j) != 0.0f) {
+                a.push_back(matrix(i, j));
+                ja.push_back(j);
+                ++nonzero;
+            }
+        }
+        ia.push_back(nonzero);
+    }
+
+    assert(a.size() == ja.size());
+    assert(ia.size() == matrix.n_rows+1);
+    n_rows = matrix.n_rows;
+    n_cols = matrix.n_cols;
+}
+
 void CSR::to_file() {
     std::stringstream filename;
     filename << "CSR-" << n << "-" << a.size() << "-" << ia.size() << "-" << ja.size() << ".bin";

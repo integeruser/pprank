@@ -12,30 +12,6 @@
 extern arma::vec mul(const CSR&, const arma::vec&, size_t);
 
 
-CSR mat_to_csr(const arma::mat& mat) {
-    CSR csr;
-    csr.ia.push_back(0);
-
-    size_t nonzero = 0;
-    for (size_t i = 0; i < mat.n_rows; ++i) {
-        for (size_t j = 0; j < mat.n_cols; ++j) {
-            if (mat(i, j) != 0.0f) {
-                csr.a.push_back(mat(i, j));
-                csr.ja.push_back(j);
-                ++nonzero;
-            }
-        }
-        csr.ia.push_back(nonzero);
-    }
-
-    assert(csr.a.size() == csr.ja.size());
-    assert(csr.ia.size() == mat.n_rows+1);
-    csr.n_rows = mat.n_rows;
-    csr.n_cols = mat.n_cols;
-    return csr;
-}
-
-
 TEST_CASE( "sparse matrix-vector multiplication" ) {
     SECTION( "1x1 matrix times 1x1 vector" ) {
         arma::mat A(1, 1);
@@ -45,7 +21,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(0) = -42.42;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = mul(mat_to_csr(A), b, b.size());
+        const auto x2 = mul(CSR(A), b, b.size());
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-5));
     }
 
@@ -67,7 +43,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(2) = -42.42;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = mul(mat_to_csr(A), b, b.size());
+        const auto x2 = mul(CSR(A), b, b.size());
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-5));
     }
 
@@ -89,7 +65,7 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
         b(3) = 3.14;
 
         const auto x1 = arma::vec(A*b);
-        const auto x2 = mul(mat_to_csr(A), b, b.size());
+        const auto x2 = mul(CSR(A), b, b.size());
         REQUIRE(arma::approx_equal(x1, x2, "absdiff", 10e-3));
     }
 }

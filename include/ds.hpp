@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "armadillo"
+
 
 struct Graph {
     size_t n;
@@ -26,6 +28,7 @@ struct CSR {
     CSR();
     CSR(const Graph& graph);
     CSR(const std::string filename);
+    CSR(const arma::mat&);
 
     void to_file();
 };
