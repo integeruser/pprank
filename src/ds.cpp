@@ -37,6 +37,27 @@ Graph::Graph(const std::string filename) {
 }
 
 
+CSR::CSR(const arma::mat& matrix) {
+    ia.push_back(0);
+
+    size_t nonzero = 0;
+    for (size_t i = 0; i < matrix.n_rows; ++i) {
+        for (size_t j = 0; j < matrix.n_cols; ++j) {
+            if (matrix(i, j) != 0.0f) {
+                a.push_back(matrix(i, j));
+                ja.push_back(j);
+                ++nonzero;
+            }
+        }
+        ia.push_back(nonzero);
+    }
+
+    assert(a.size() == ja.size());
+    assert(ia.size() == matrix.n_rows+1);
+    n_rows = matrix.n_rows;
+    n_cols = matrix.n_cols;
+}
+
 CSR::CSR(const Graph& graph) {
     n_rows = graph.nodes.size();
     n_cols = graph.nodes.size();
@@ -61,7 +82,7 @@ CSR::CSR(const Graph& graph) {
     assert(ia.size() == graph.nodes.size()+1);
 }
 
-CSR::CSR(const std::string filename) {
+CSR::CSR(const std::string& filename) {
     std::ifstream infile(filename, std::ios::in | std::ios::binary);
 
     size_t a_size, ia_size, ja_size;
@@ -80,26 +101,6 @@ CSR::CSR(const std::string filename) {
     n_cols = 0;
 }
 
-CSR::CSR(const arma::mat& matrix) {
-    ia.push_back(0);
-
-    size_t nonzero = 0;
-    for (size_t i = 0; i < matrix.n_rows; ++i) {
-        for (size_t j = 0; j < matrix.n_cols; ++j) {
-            if (matrix(i, j) != 0.0f) {
-                a.push_back(matrix(i, j));
-                ja.push_back(j);
-                ++nonzero;
-            }
-        }
-        ia.push_back(nonzero);
-    }
-
-    assert(a.size() == ja.size());
-    assert(ia.size() == matrix.n_rows+1);
-    n_rows = matrix.n_rows;
-    n_cols = matrix.n_cols;
-}
 
 arma::vec CSR::operator*(const arma::vec& vec) {
     // see http://www.mathcs.emory.edu/~cheung/Courses/561/Syllabus/3-C/sparse.html

@@ -22,11 +22,12 @@ struct Graph {
 struct CSR {
     size_t n_rows, n_cols;
     std::vector<float> a;
-    std::vector<uint_fast32_t> ia, ja;
+    std::vector<uint_fast32_t> ia;
+    std::vector<uint_fast32_t> ja;
 
-    CSR(const Graph& graph);
-    CSR(const std::string filename);
     CSR(const arma::mat&);
+    CSR(const Graph&);
+    CSR(const std::string&);
 
     arma::vec operator*(const arma::vec&);
 
