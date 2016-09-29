@@ -13,7 +13,7 @@
 struct Graph {
     std::map<uint_fast32_t, std::set<uint_fast32_t>> edges;
 
-    Graph(const std::string filename);
+    Graph(const std::string&);
 };
 
 
@@ -23,7 +23,7 @@ struct CSR {
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
 
-    CSR() {};
+    CSR() {}
     CSR(const arma::mat&);
     CSR(const Graph&);
     CSR(const std::string&);

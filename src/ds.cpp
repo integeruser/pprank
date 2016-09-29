@@ -4,12 +4,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "ds.hpp"
-
 #include "prettyprint.hpp"
 
+#include "ds.hpp"
 
-Graph::Graph(const std::string filename) {
+
+Graph::Graph(const std::string& filename) {
     // assume the file contains two integers per line, separated by a whitespace
     // each line represent an edge from a source node to a destination node
     std::ifstream infile(filename, std::ios::in);
