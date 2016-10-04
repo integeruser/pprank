@@ -11,8 +11,8 @@ seqdense-notranspose:
 	src/ds.cpp examples/seqdense-notranspose.cpp -o seqdense-notranspose
 
 mpi-dense-vec-product:
-	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi \
-	examples/mpi-dense-vec-product.cpp -o mpi-dense-vec-product
+	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude \
+	src/nw.cpp examples/mpi-dense-vec-product.cpp -o mpi-dense-vec-product
 
 simd:
 	gcc-6 -Wall -O3 -std=c11 -msse4.1 examples/simd.c -o simd
