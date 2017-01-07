@@ -12,7 +12,8 @@
 #include "prettyprint.hpp"
 
 
-float dist(const std::vector<float>& a, const std::vector<float>& b) {
+float dist(const std::vector<float>& a, const std::vector<float>& b)
+{
     assert(a.size() == b.size());
     const auto n = a.size();
 
@@ -23,7 +24,8 @@ float dist(const std::vector<float>& a, const std::vector<float>& b) {
     return std::sqrt(d);
 }
 
-std::map<uint_fast32_t, float> rank(const Graph& graph) {
+std::map<uint_fast32_t, float> rank(const Graph& graph)
+{
     // initialization
     const auto n = graph.edges.size();
 
@@ -58,7 +60,8 @@ std::map<uint_fast32_t, float> rank(const Graph& graph) {
         for (size_t i = 0; i < n; ++i) {
             p_new[i] = (1.0f-d)/n + d * p_new[i];
         }
-    } while (dist(p, p_new) >= 1E-6f);
+    }
+    while (dist(p, p_new) >= 1E-6f);
     std::cout << "Ended in " << iterations << " iterations" << std::endl;
 
     std::map<uint_fast32_t, float> ranks;
@@ -69,7 +72,8 @@ std::map<uint_fast32_t, float> rank(const Graph& graph) {
 }
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " filename" << std::endl;
         return EXIT_FAILURE;
