@@ -5,7 +5,9 @@ This repository contains a parallel implementation of PageRank™, using MPI and
 ## Usage
 On Mac OS, install the required dependencies using [Homebrew](http://brew.sh/):
 ```
-brew install gcc --without-multilib homebrew/science/armadillo mpich
+$ brew install gcc --without-multilib
+$ brew install homebrew/science/armadillo
+$ brew install mpich
 ```
 
 
