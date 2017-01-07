@@ -1,5 +1,5 @@
 # pprank
-This repository contains a parallel implementation of PageRank™, using MPI and SIMD instructions.
+This repository contains a parallel implementation of [PageRank](https://en.wikipedia.org/wiki/PageRank), using MPI and SIMD instructions.
 
 
 ## Usage
