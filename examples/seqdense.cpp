@@ -10,7 +10,8 @@
 #include "prettyprint.hpp"
 
 
-std::map<uint_fast32_t, float> rank(const Graph& graph) {
+std::map<uint_fast32_t, float> rank(const Graph& graph)
+{
     // initialization
     const auto n = graph.edges.size();
 
@@ -46,7 +47,8 @@ std::map<uint_fast32_t, float> rank(const Graph& graph) {
 
         p_prev = p;
         p = (1-d)/n * ones + d * (At*p);
-    } while (arma::norm(p-p_prev) >= 1E-6f);
+    }
+    while (arma::norm(p-p_prev) >= 1E-6f);
     std::cout << "Ended in " << iterations << " iterations" << std::endl;
 
     std::map<uint_fast32_t, float> ranks;
@@ -57,7 +59,8 @@ std::map<uint_fast32_t, float> rank(const Graph& graph) {
 }
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " filename" << std::endl;
         return EXIT_FAILURE;
