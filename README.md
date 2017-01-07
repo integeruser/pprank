@@ -27,6 +27,5 @@ In addition, this repository contains some minimal examples on the usage of SIMD
 
 - `examples/simd/simd.c` - `make simd && ./simd`  
 Matrix-vector multiplication with SIMD instructions
-- `examples/simd/seqdense.cpp` - `make seqdense && ./seqdense inputs/toy.txt`  
-PageRank computation from a dense matrix without any parallelization
+- `examples/seqdense.cpp` - `make seqdense && ./seqdense inputs/toy.txt`  
 
