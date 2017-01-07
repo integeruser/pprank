@@ -25,9 +25,7 @@ The code uses [cxx-prettyprint](https://louisdx.github.io/cxx-prettyprint/) for 
 ## Examples
 In addition, this repository contains some minimal examples on the usage of SIMD, OpenMP and MPI:
 
-- `examples/simd/simd.c` - `make simd && ./simd`  
-Matrix-vector multiplication with SIMD instructions
-- `examples/seqdense.cpp` - `make seqdense && ./seqdense inputs/toy.txt`  
-- `examples/mpi/mpi-dense-vec-product.cpp` - `make mpi-dense-vec-product && mpirun -n 2 ./mpi-dense-vec-product`  
-Matrix-vector multiplication with Armadillo and MPI
+- `examples/simd/simd.c` - `make simd && ./simd` - Matrix-vector multiplication with SIMD instructions
+- `examples/seqdense.cpp` - `make seqdense && ./seqdense inputs/toy.txt` - PageRank computation from a dense matrix without any parallelization
+- `examples/mpi/mpi-dense-vec-product.cpp` - `make mpi-dense-vec-product && mpirun -n 2 ./mpi-dense-vec-product` - Matrix-vector multiplication with Armadillo and MPI
 
