@@ -1,7 +1,3 @@
-csrsplit:
-	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
-	src/ds.cpp examples/csrsplit.cpp -o csrsplit
-
 seqdense:
 	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
 	src/ds.cpp examples/seqdense.cpp -o seqdense
