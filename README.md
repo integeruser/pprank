@@ -28,4 +28,6 @@ In addition, this repository contains some minimal examples on the usage of SIMD
 - `examples/simd/simd.c` - `make simd && ./simd`  
 Matrix-vector multiplication with SIMD instructions
 - `examples/seqdense.cpp` - `make seqdense && ./seqdense inputs/toy.txt`  
+- `examples/mpi/mpi-dense-vec-product.cpp` - `make mpi-dense-vec-product && mpirun -n 2 ./mpi-dense-vec-product`  
+Matrix-vector multiplication with Armadillo and MPI
 
