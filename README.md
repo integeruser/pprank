@@ -10,7 +10,7 @@ $ brew install homebrew/science/armadillo
 $ brew install mpich
 ```
 
-Files are formatted using [astyle](http://astyle.sourceforge.net/): `astyle --style=linux --indent-classes --indent-switches --break-closing-brackets --add-brackets --keep-one-line-statements --close-templates --max-code-length=120 --break-after-logical --lineend=linux`.
+Files are formatted using [astyle](http://astyle.sourceforge.net/) with the command `astyle --options=astylerc ./file/to/format`.
 
 
 ## Examples
