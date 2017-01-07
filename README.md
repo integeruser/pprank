@@ -16,8 +16,8 @@ Files are formatted using [astyle](http://astyle.sourceforge.net/) with the comm
 ## Examples
 In addition, this repository contains some minimal examples on the usage of SIMD, OpenMP and MPI:
 
-- `examples/simd/simd.c` - `make -B simd && ./simd`
+- `examples/simd/simd.c` - `make -B simd && ./simd`  
 Matrix-vector multiplication with SIMD instructions
-- `examples/simd/seqdense.cpp` - `make -B seqdense && ./seqdense inputs/toy.txt`
+- `examples/simd/seqdense.cpp` - `make -B seqdense && ./seqdense inputs/toy.txt`  
 PageRank computation from a dense matrix without any parallelization
 
