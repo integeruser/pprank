@@ -7,7 +7,7 @@ On Mac OS, install the required dependencies using [Homebrew](http://brew.sh/):
 ```
 $ brew install gcc --without-multilib
 $ brew install homebrew/science/armadillo
-$ brew install mpich
+$ HOMEBREW_CC=gcc-6 HOMEBREW_CXX=g++-6 brew install mpich --build-from-source
 ```
 
 The tests included are based on the [Catch](https://github.com/philsquared/Catch) framework:
