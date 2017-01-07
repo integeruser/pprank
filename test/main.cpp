@@ -1,4 +1,4 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include "ds.hpp"
@@ -7,7 +7,8 @@
 #include "prettyprint.hpp"
 
 
-TEST_CASE( "sparse matrix-vector construction" ) {
+TEST_CASE( "sparse matrix-vector construction" )
+{
     SECTION( "from matrix" ) {
         SECTION( "1x3" ) {
             arma::mat A(1, 3);
@@ -19,9 +20,15 @@ TEST_CASE( "sparse matrix-vector construction" ) {
 
             REQUIRE(csr.n_rows == A.n_rows);
             REQUIRE(csr.n_cols == A.n_cols);
-            REQUIRE(csr.a == ((const std::vector<float>){3.14f, 1337.0f}));
-            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 2}));
-            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){0, 2}));
+            REQUIRE(csr.a == ((const std::vector<float>) {
+                3.14f, 1337.0f
+            }));
+            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>) {
+                0, 2
+            }));
+            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>) {
+                0, 2
+            }));
         }
 
         SECTION( "3x3" ) {
@@ -40,28 +47,41 @@ TEST_CASE( "sparse matrix-vector construction" ) {
 
             REQUIRE(csr.n_rows == A.n_rows);
             REQUIRE(csr.n_cols == A.n_cols);
-            REQUIRE(csr.a == ((const std::vector<float>){1.0f, 1337.0f, 1.0f, 42.0f}));
-            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 2, 3, 4}));
-            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){0, 2, 2, 1}));
+            REQUIRE(csr.a == ((const std::vector<float>) {
+                1.0f, 1337.0f, 1.0f, 42.0f
+            }));
+            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>) {
+                0, 2, 3, 4
+            }));
+            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>) {
+                0, 2, 2, 1
+            }));
         }
     }
 
     SECTION( "from graph" ) {
-        SECTION( "simple.txt" ) {
-            const auto graph = Graph("inputs/simple.txt");
+        SECTION( "toy.txt" ) {
+            const auto graph = Graph("inputs/toy.txt");
 
             const auto csr = CSR(graph);
 
             REQUIRE(csr.n_rows == graph.edges.size());
             REQUIRE(csr.n_cols == graph.edges.size());
-            REQUIRE(csr.a == ((const std::vector<float>){1.0f, 1.0f}));
-            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>){0, 1, 2, 2}));
-            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>){1, 2}));
+            REQUIRE(csr.a == ((const std::vector<float>) {
+                1.0f, 1.0f
+            }));
+            REQUIRE(csr.ia == ((const std::vector<uint_fast32_t>) {
+                0, 1, 2, 2
+            }));
+            REQUIRE(csr.ja == ((const std::vector<uint_fast32_t>) {
+                1, 2
+            }));
         }
     }
 }
 
-TEST_CASE( "sparse matrix-vector multiplication" ) {
+TEST_CASE( "sparse matrix-vector multiplication" )
+{
     SECTION( "1x1 matrix times 1x1 vector" ) {
         arma::mat A(1, 1);
         A(0, 0) = 1337;
@@ -119,7 +139,8 @@ TEST_CASE( "sparse matrix-vector multiplication" ) {
     }
 }
 
-TEST_CASE( "sparse matrix splitting" ) {
+TEST_CASE( "sparse matrix splitting" )
+{
     SECTION( "split 1x1 matrix into 1 submatrix" ) {
         arma::mat A(1, 1);
         A(0, 0) = 1337;
@@ -130,9 +151,15 @@ TEST_CASE( "sparse matrix splitting" ) {
 
         REQUIRE(split.size() == 1);
 
-        REQUIRE(split[0].a == ((const std::vector<float>){1337.0f}));
-        REQUIRE(split[0].ia == ((const std::vector<uint_fast32_t>){0, 1}));
-        REQUIRE(split[0].ja == ((const std::vector<uint_fast32_t>){0}));
+        REQUIRE(split[0].a == ((const std::vector<float>) {
+            1337.0f
+        }));
+        REQUIRE(split[0].ia == ((const std::vector<uint_fast32_t>) {
+            0, 1
+        }));
+        REQUIRE(split[0].ja == ((const std::vector<uint_fast32_t>) {
+            0
+        }));
     }
 
     SECTION( "split 2x2 matrix into 2 submatrices" ) {
@@ -152,12 +179,24 @@ TEST_CASE( "sparse matrix splitting" ) {
 
         REQUIRE(split.size() == 2);
 
-        REQUIRE(split[0].a == ((const std::vector<float>){1.0f, 1337.0f}));
-        REQUIRE(split[0].ia == ((const std::vector<uint_fast32_t>){0, 2}));
-        REQUIRE(split[0].ja == ((const std::vector<uint_fast32_t>){0, 2}));
+        REQUIRE(split[0].a == ((const std::vector<float>) {
+            1.0f, 1337.0f
+        }));
+        REQUIRE(split[0].ia == ((const std::vector<uint_fast32_t>) {
+            0, 2
+        }));
+        REQUIRE(split[0].ja == ((const std::vector<uint_fast32_t>) {
+            0, 2
+        }));
 
-        REQUIRE(split[1].a == ((const std::vector<float>){42.42f, -31337.0f, 3.14f}));
-        REQUIRE(split[1].ia == ((const std::vector<uint_fast32_t>){0, 3}));
-        REQUIRE(split[1].ja == ((const std::vector<uint_fast32_t>){0, 1, 2}));
+        REQUIRE(split[1].a == ((const std::vector<float>) {
+            42.42f, -31337.0f, 3.14f
+        }));
+        REQUIRE(split[1].ia == ((const std::vector<uint_fast32_t>) {
+            0, 3
+        }));
+        REQUIRE(split[1].ja == ((const std::vector<uint_fast32_t>) {
+            0, 1, 2
+        }));
     }
 }
