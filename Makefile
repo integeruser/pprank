@@ -15,7 +15,7 @@ mpi-dense-vec-product:
 	src/nw.cpp examples/mpi-dense-vec-product.cpp -o mpi-dense-vec-product
 
 simd:
-	gcc-6 -Wall -O3 -std=c11 -msse4.1 examples/simd.c -o simd
+	gcc-6 -Wall -O3 -std=c11 -msse4.1 examples/simd/simd.c -o simd
 
 
 tests:

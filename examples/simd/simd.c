@@ -9,7 +9,8 @@
 #define A(r, c) (A[(r)*N + (c)])
 
 
-void set(float* A, float* b, float* x) {
+void set(float* A, float* b, float* x)
+{
     A(0, 0) = 1.0f;
     A(0, 1) = 1337.0f;
     A(0, 2) = 13.0f;
@@ -39,18 +40,21 @@ void set(float* A, float* b, float* x) {
 }
 
 
-void mul(const float* A, const float* b, float* x) {
+void mul(const float* A, const float* b, float* x)
+{
     for (size_t i = 0; i < N; ++i) {
         x[i] = A(i, 0) * b[0] + A(i, 1) * b[1] + A(i, 2) * b[2] + A(i, 3) * b[3];
     }
 }
 
-inline void dot(const float* row, const float* col, float* res) {
+inline void dot(const float* row, const float* col, float* res)
+{
     const int mask = 0xff;
     __m128 res_vec = _mm_dp_ps(_mm_load_ps(row), _mm_load_ps(col), mask);
     _mm_store_ss(res, res_vec);
 }
-void mul_simd(float* A, float* b, float* x) {
+void mul_simd(float* A, float* b, float* x)
+{
     for (size_t i = 0; i < N; ++i) {
         const float* row = &A[N*i];
         const float* col = b;
@@ -60,7 +64,8 @@ void mul_simd(float* A, float* b, float* x) {
 }
 
 
-void check(float* x) {
+void check(float* x)
+{
     assert(x[0] == 1699.5f);
     assert(x[1] == 491.0f);
     assert(x[2] == -5783.5f);
@@ -68,7 +73,8 @@ void check(float* x) {
 }
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
     clock_t begin, end;
 
     float* A = NULL;
