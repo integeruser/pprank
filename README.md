@@ -21,6 +21,8 @@ All tests passed (29 assertions in 3 test cases)
 
 The code uses [cxx-prettyprint](https://louisdx.github.io/cxx-prettyprint/) for pretty-printing C++ containers. Files are formatted with [astyle](http://astyle.sourceforge.net/) using the included options file `astylerc`.
 
+I tested the code using two graphs from (stanford.edu)[http://snap.stanford.edu/data/#web]:
+
 
 ## Examples
 In addition, this repository contains some minimal examples on the usage of SIMD, OpenMP and MPI:
