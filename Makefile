@@ -6,9 +6,9 @@ seqdense-notranspose:
 	g++-6 -Wall -O3 -std=c++17 -Iinclude -Ilib \
 	src/ds.cpp examples/seqdense-notranspose.cpp -o seqdense-notranspose
 
-mpi-dense-vec-product:
-	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude \
-	src/nw.cpp examples/mpi/mpi-dense-vec-product.cpp -o mpi-dense-vec-product
+mpi-matvecprod-dense:
+	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude -Ilib \
+	src/nw.cpp examples/mpi-matvecprod-dense.cpp -o mpi-matvecprod-dense
 
 simd:
 	gcc-6 -Wall -O3 -std=c11 -msse4.1 examples/simd/simd.c -o simd
@@ -20,4 +20,4 @@ tests:
 
 
 clean:
-	rm -f mpi-dense-vec-product seqdense seqdense-notranspose simd tests
+	rm -f mpi-matvecprod-dense seqdense seqdense-notranspose simd tests
