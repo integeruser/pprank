@@ -1,10 +1,114 @@
 #include <cassert>
+#include <iostream>
 #include <vector>
+
+#include "nw.hpp"
 
 #include "armadillo"
 #include "mpi.h"
 
-#include "nw.hpp"
+
+std::vector<std::pair<unsigned, const arma::mat>> split(const auto& mat, unsigned slave_count)
+{
+    std::vector<std::pair<unsigned, const arma::mat>> chunks;
+    unsigned num_processed_rows = 0;
+    for (unsigned i = 0; i < slave_count; ++i) {
+        const unsigned offset = num_processed_rows;
+        const unsigned n_rows = mat.n_rows/slave_count + (i < mat.n_rows%slave_count);
+        const arma::mat& chunk = mat.rows(offset, offset+(n_rows-1));
+        chunks.emplace_back(offset, chunk);
+        num_processed_rows += n_rows;
+    }
+    return chunks;
+}
+
+void master_do(unsigned slave_count, unsigned master, unsigned tag)
+{
+    arma::mat mat(4, 4);
+    mat(0, 0) = 1.0;
+    mat(0, 1) = 1337.0;
+    mat(0, 2) = 13.0;
+    mat(0, 3) = 2.0;
+    mat(1, 0) = 14.0;
+    mat(1, 1) = 1.0;
+    mat(1, 2) = 0.0;
+    mat(1, 3) = 12.0;
+    mat(2, 0) = 65.0;
+    mat(2, 1) = 34.0;
+    mat(2, 2) = 45.0;
+    mat(2, 3) = -160.0;
+    mat(3, 0) = 76.0;
+    mat(3, 1) = 23.0;
+    mat(3, 2) = -1.0;
+    mat(3, 3) = 0.5;
+    assert(slave_count <= mat.n_rows);
+
+    arma::vec vec(4);
+    vec(0) = -1.0;
+    vec(1) = 1.0;
+    vec(2) = 21.5;
+    vec(3) = 42.0;
+    assert(mat.n_cols == vec.size());
+
+    // split the matrix in submatrices and send them to slaves
+    const auto& chunks = split(mat, slave_count);
+    for (unsigned i = 0; i < slave_count; ++i) {
+        const auto& chunk = chunks.at(i).second;
+
+        const auto slave = i+1;
+        send_uns(chunk.n_rows, slave, tag);
+        send_mat(chunk, slave, tag);
+    }
+
+    // send the vector to each slave
+    for (unsigned i = 0; i < slave_count; ++i) {
+        const auto slave = i+1;
+        send_vec(vec, slave, tag);
+    }
+
+    // receive back the dot products
+    auto res = arma::vec(mat.n_rows);
+    for (unsigned i = 0; i < slave_count; ++i) {
+        const auto offset = chunks.at(i).first;
+        const auto& chunk = chunks.at(i).second;
+
+        const auto slave = i+1;
+        const auto& mat = recv_mat(slave, tag, chunk.n_rows);
+        for (size_t j = 0; j < mat.n_rows; ++j) {
+            res(offset+j) = mat(j, 0);
+        }
+    }
+
+    std::stringstream ss;
+    ss << "Result: " << std::endl << res;
+    std::cout << ss.str() << std::endl;
+    assert(arma::approx_equal(res, arma::vec{1699.5f, 491.0f, -5783.5f, -53.5f}, "absdiff", 10e-5));
+}
+
+
+void slave_do(int rank, unsigned master, unsigned tag)
+{
+    std::stringstream ss;
+    ss << "----------" << std::endl;
+    ss << "Hello from slave " << rank << "!" << std::endl;
+
+    // receive from the master the number of rows and the matrix to process
+    const auto n_rows = recv_uns(master, tag);
+    const auto& mat = recv_mat(master, tag, n_rows);
+    ss << "I have received" << std::endl << mat;
+
+    // receive from the master the vector to process
+    const auto& vec = recv_vec(master, tag);
+    ss << "and" << std::endl << vec;
+
+    // compute the dot product and send the result back to the master
+    const auto& dot = mat*vec;
+    send_mat(dot, master, tag);
+    ss << "to compute" << std::endl << dot;
+
+    ss << "----------";
+    std::cout << ss.str() << std::endl;
+}
 
 
 int main(int argc, char** argv)
@@ -18,102 +122,16 @@ int main(int argc, char** argv)
     MPI_Comm_size(MPI_COMM_WORLD, &process_count);
     assert(process_count >= 2);
 
+    const unsigned slave_count = process_count-1;
+
     const unsigned master = 0;
     const unsigned tag = 0;
 
     if (rank == 0) {
-        arma::mat mat(4, 4);
-        mat(0, 0) = 1.0;
-        mat(0, 1) = 1337.0;
-        mat(0, 2) = 13.0;
-        mat(0, 3) = 2.0;
-        mat(1, 0) = 14.0;
-        mat(1, 1) = 1.0;
-        mat(1, 2) = 0.0;
-        mat(1, 3) = 12.0;
-        mat(2, 0) = 65.0;
-        mat(2, 1) = 34.0;
-        mat(2, 2) = 45.0;
-        mat(2, 3) = -160.0;
-        mat(3, 0) = 76.0;
-        mat(3, 1) = 23.0;
-        mat(3, 2) = -1.0;
-        mat(3, 3) = 0.5;
-
-        arma::vec vec(4);
-        vec(0) = -1.0;
-        vec(1) = 1.0;
-        vec(2) = 21.5;
-        vec(3) = 42.0;
-
-        assert(mat.n_cols == vec.size());
-
-        const unsigned slave_count = process_count-1;
-        assert(slave_count <= mat.n_rows);
-
-        // send to each slave the vector to process
-        for (unsigned i = 0; i < slave_count; ++i) {
-            const auto slave = i+1;
-            send_vec(vec, slave, tag);
-        }
-
-        // count how many rows send to each slave process
-        std::vector<unsigned> row_count(slave_count);
-        for (size_t i = 0; i < mat.n_rows; ++i) {
-            ++row_count[i%slave_count];
-        }
-        std::vector<unsigned> offsets(slave_count);
-        unsigned offset = 0;
-        for (unsigned i = 0; i < slave_count; ++i) {
-            offsets[i] = offset;
-            offset += row_count[i];
-        }
-
-        // send to each slave the number of rows of the matrix to process
-        for (unsigned i = 0; i < slave_count; ++i) {
-            const auto val = row_count[i];
-            const auto slave = i+1;
-            send_uns(val, slave, tag);
-        }
-
-        // split the matrix into (roughly) evenly sized chunks,
-        // and send each chunk to a different process
-        unsigned row_index = 0;
-        for (unsigned i = 0; i < slave_count; ++i) {
-            const auto& submat = mat.rows(row_index, row_index+(row_count[i]-1));
-            row_index += row_count[i];
-            const auto slave = i+1;
-            send_mat(submat, slave, tag);
-        }
-        assert(row_index == mat.n_rows);
-
-        // receive the dot products
-        auto res = arma::vec(mat.n_rows);
-        for (unsigned i = 0; i < slave_count; ++i) {
-            const auto slave = i+1;
-            const auto n_rows = row_count[i];
-            const auto& mat = recv_mat(slave, tag, n_rows);
-            for (size_t j = 0; j < mat.n_rows; ++j) {
-                res(offsets[i]+j) = mat(j, 0);
-            }
-        }
-
-        std::cout << "Result: " << std::endl;
-        std::cout << res << std::endl;
-        assert(arma::approx_equal(res, arma::vec{1699.5f, 491.0f, -5783.5f, -53.5f}, "absdiff", 10e-5));
+        master_do(slave_count, master, tag);
     }
     else {
-        // receive from the master the vector to process
-        const auto& vec = recv_vec(master, tag);
-
-        // receive from the master the number of rows of the matrix to process
-        const auto n_rows = recv_uns(master, tag);
-
-        // receive from the master the matrix to process
-        const auto& mat = recv_mat(master, tag, n_rows);
-
-        // compute the dot product and send the result to the master
-        send_mat(mat*vec, master, tag);
+        slave_do(rank, master, tag);
     }
 
     MPI_Finalize();
