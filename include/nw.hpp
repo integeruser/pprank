@@ -16,7 +16,7 @@ arma::vec recv_vec(unsigned source, unsigned tag);
 
 void send_mat(const arma::mat& mat, unsigned destination, unsigned tag);
 
-arma::mat recv_mat(unsigned source, unsigned tag, unsigned n_rows);
+arma::mat recv_mat(unsigned source, unsigned tag);
 
 
 #endif

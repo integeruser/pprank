@@ -37,11 +37,17 @@ arma::vec recv_vec(unsigned source, unsigned tag)
 
 void send_mat(const arma::mat& mat, unsigned destination, unsigned tag)
 {
+    // before sending the matrix, send its number of rows
+    send_uns(mat.n_rows, destination, tag);
+
     MPI_Send(mat.cbegin(), mat.size(), MPI_DOUBLE, destination, tag, MPI_COMM_WORLD);
 }
 
-arma::mat recv_mat(unsigned source, unsigned tag, unsigned n_rows)
+arma::mat recv_mat(unsigned source, unsigned tag)
 {
+    // before receiving the matrix, receive its number of rows
+    const auto n_rows = recv_uns(source, tag);
+
     MPI_Status status;
     MPI_Probe(source, tag, MPI_COMM_WORLD, &status);
 

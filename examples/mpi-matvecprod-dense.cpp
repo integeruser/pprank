@@ -54,9 +54,7 @@ void master_do(unsigned slave_count, unsigned master, unsigned tag)
     const auto& chunks = split(mat, slave_count);
     for (unsigned i = 0; i < slave_count; ++i) {
         const auto& chunk = chunks.at(i).second;
-
         const auto slave = i+1;
-        send_uns(chunk.n_rows, slave, tag);
         send_mat(chunk, slave, tag);
     }
 
@@ -69,11 +67,9 @@ void master_do(unsigned slave_count, unsigned master, unsigned tag)
     // receive back the dot products
     auto res = arma::vec(mat.n_rows);
     for (unsigned i = 0; i < slave_count; ++i) {
-        const auto offset = chunks.at(i).first;
-        const auto& chunk = chunks.at(i).second;
-
         const auto slave = i+1;
-        const auto& mat = recv_mat(slave, tag, chunk.n_rows);
+        const auto& mat = recv_mat(slave, tag);
+        const auto offset = chunks.at(i).first;
         for (size_t j = 0; j < mat.n_rows; ++j) {
             res(offset+j) = mat(j, 0);
         }
@@ -92,9 +88,8 @@ void slave_do(int rank, unsigned master, unsigned tag)
     ss << "----------" << std::endl;
     ss << "Hello from slave " << rank << "!" << std::endl;
 
-    // receive from the master the number of rows and the matrix to process
-    const auto n_rows = recv_uns(master, tag);
-    const auto& mat = recv_mat(master, tag, n_rows);
+    // receive from the master the matrix to process
+    const auto& mat = recv_mat(master, tag);
     ss << "I have received" << std::endl << mat;
 
     // receive from the master the vector to process
