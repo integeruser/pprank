@@ -2,7 +2,9 @@
 This repository contains a parallel implementation of [PageRank](https://en.wikipedia.org/wiki/PageRank), using MPI and SIMD instructions.
 
 
-## Usage
+## Requisites
+The code is based on [Armadillo](http://arma.sourceforge.net/) (a C++ linear algebra library) and on [MPICH](https://www.mpich.org/) (an implementation of the MPI standard). The code was compiled using [GCC](https://gcc.gnu.org/).
+
 On Mac OS, install the required dependencies using [Homebrew](http://brew.sh/):
 ```
 $ brew install gcc --without-multilib
@@ -10,6 +12,8 @@ $ brew install homebrew/science/armadillo
 $ HOMEBREW_CC=gcc-6 HOMEBREW_CXX=g++-6 brew install mpich --build-from-source
 ```
 
+
+## Usage
 The tests included are based on the [Catch](https://github.com/philsquared/Catch) framework:
 ```
 $ make tests && ./tests
