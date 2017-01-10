@@ -22,7 +22,7 @@ std::vector<std::pair<unsigned, const arma::mat>> split(const auto& mat, unsigne
     return chunks;
 }
 
-void master_do(unsigned slave_count, unsigned master, unsigned tag)
+void master_do(unsigned slave_count, unsigned tag)
 {
     arma::mat mat(4, 4);
     mat(0, 0) = 1.0;
@@ -64,7 +64,7 @@ void master_do(unsigned slave_count, unsigned master, unsigned tag)
         send_vec(vec, slave, tag);
     }
 
-    // receive back the dot products
+    // receive back the matrix-vector products
     auto res = arma::vec(mat.n_rows);
     for (unsigned i = 0; i < slave_count; ++i) {
         const auto slave = i+1;
@@ -88,7 +88,7 @@ void slave_do(int rank, unsigned master, unsigned tag)
     ss << "----------" << std::endl;
     ss << "Hello from slave " << rank << "!" << std::endl;
 
-    // receive from the master the matrix to process
+    // receive from the master the submatrix to process
     const auto& mat = recv_mat(master, tag);
     ss << "I have received" << std::endl << mat;
 
@@ -96,7 +96,7 @@ void slave_do(int rank, unsigned master, unsigned tag)
     const auto& vec = recv_vec(master, tag);
     ss << "and" << std::endl << vec;
 
-    // compute the dot product and send the result back to the master
+    // compute the multiplication between the two and send the result back to the master
     const auto& dot = mat*vec;
     send_mat(dot, master, tag);
     ss << "to compute" << std::endl << dot;
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
     const unsigned tag = 0;
 
     if (rank == 0) {
-        master_do(slave_count, master, tag);
+        master_do(slave_count, tag);
     }
     else {
         slave_do(rank, master, tag);
