@@ -9,16 +9,18 @@
 
 #include "armadillo"
 
+using NodeIndex = uint_fast32_t;
+
 
 struct Graph {
-    std::map<uint_fast32_t, std::set<uint_fast32_t>> edges;
+    std::map<NodeIndex, std::set<NodeIndex>> edges;
 
     Graph(const std::string&);
 };
 
 
 struct CSR {
-    size_t n_rows, n_cols;
+    std::size_t n_rows, n_cols;
     std::vector<float> a;
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
@@ -30,7 +32,7 @@ struct CSR {
 
     arma::vec operator*(const arma::vec&);
 
-    std::vector<CSR> split(size_t) const;
+    std::vector<CSR> split(std::size_t) const;
 
     void to_file();
 };

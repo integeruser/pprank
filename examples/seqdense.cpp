@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
-#include <vector>
 
 #include "ds.hpp"
 
@@ -10,12 +9,12 @@
 #include "prettyprint.hpp"
 
 
-std::map<uint_fast32_t, float> rank(const Graph& graph)
+std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const auto n = graph.edges.size();
-
+    const size_t n = graph.edges.size();
     const auto d = 0.85f;
+    const auto ones = arma::ones<arma::vec>(n);
 
     arma::vec p(n), p_prev;
     p.fill(1.0f/n);
@@ -35,12 +34,9 @@ std::map<uint_fast32_t, float> rank(const Graph& graph)
             }
         }
     }
-
     const auto At = A.t();
 
-    const auto ones = arma::ones<arma::vec>(n);
-
-    // PageRank computation
+    // ranks computation
     size_t iterations = 0;
     do {
         iterations += 1;
@@ -49,13 +45,13 @@ std::map<uint_fast32_t, float> rank(const Graph& graph)
         p = (1-d)/n * ones + d * (At*p);
     }
     while (arma::norm(p-p_prev) >= 1E-6f);
-    std::cout << "Ended in " << iterations << " iterations" << std::endl;
 
-    std::map<uint_fast32_t, float> ranks;
+    // map each node to its rank
+    std::map<NodeIndex, float> ranks;
     for (size_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
-    return ranks;
+    return std::make_pair(iterations, ranks);
 }
 
 
@@ -70,8 +66,10 @@ int main(int argc, char const *argv[])
     const auto graph = Graph(filename);
     std::cout << "Edges: " << graph.edges << std::endl;
 
-    const auto ranks = rank(graph);
-    std::cout << "Ranks: " << ranks << std::endl;
+    const auto results = pagerank(graph);
+    const auto iterations = results.first;
+    const auto ranks = results.second;
+    std::cout << "Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
 
     return EXIT_SUCCESS;
 }
