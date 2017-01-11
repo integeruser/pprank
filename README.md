@@ -31,7 +31,8 @@ I tested the code using two graphs from [stanford.edu](http://snap.stanford.edu/
 ## Examples
 In addition, this repository contains some minimal examples on the usage of SIMD, OpenMP and MPI:
 
-- `examples/simd/simd.c` - `make simd && ./simd` - Matrix-vector multiplication with SIMD instructions
-- `examples/seqdense.cpp` - `make seqdense && ./seqdense inputs/toy.txt` - PageRank computation from a dense matrix without any parallelization
+- `examples/pagerank-dense.cpp` - `make pagerank-dense && ./pagerank-dense inputs/toy.txt` - PageRank computation from a dense matrix
+- `examples/pagerank-notranspose.cpp` - `make pagerank-notranspose && ./pagerank-notranspose inputs/toy.txt` - PageRank computation without storing the ranks matrix in memory (but recomputing its rows at every iteration)
 - `examples/mpi-matvecprod-dense.cpp` - `make mpi-matvecprod-dense && mpirun -n 2 ./mpi-matvecprod-dense` - Matrix-vector multiplication with Armadillo and MPI
+- `examples/simd/simd.c` - `make simd && ./simd` - Matrix-vector multiplication with SIMD instructions
 
