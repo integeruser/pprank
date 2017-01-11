@@ -1,5 +1,8 @@
 #include <cassert>
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 #include "nw.hpp"
@@ -70,7 +73,7 @@ void master_do(unsigned slave_count, unsigned tag)
         const auto slave = i+1;
         const auto& mat = recv_mat(slave, tag);
         const auto offset = chunks.at(i).first;
-        for (size_t j = 0; j < mat.n_rows; ++j) {
+        for (std::size_t j = 0; j < mat.n_rows; ++j) {
             res(offset+j) = mat(j, 0);
         }
     }
@@ -106,7 +109,7 @@ void slave_do(int rank, unsigned master, unsigned tag)
 }
 
 
-int main(int argc, char** argv)
+int main(int argc, char const *argv[])
 {
     MPI_Init(NULL, NULL);
 
