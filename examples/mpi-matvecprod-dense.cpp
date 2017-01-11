@@ -54,7 +54,7 @@ void master_do(unsigned slave_count, unsigned tag)
     assert(mat.n_cols == vec.size());
 
     // split the matrix in submatrices and send them to slaves
-    const auto& chunks = split(mat, slave_count);
+    const auto chunks = split(mat, slave_count);
     for (unsigned i = 0; i < slave_count; ++i) {
         const auto& chunk = chunks.at(i).second;
         const auto slave = i+1;
@@ -68,20 +68,20 @@ void master_do(unsigned slave_count, unsigned tag)
     }
 
     // receive back the matrix-vector products
-    auto res = arma::vec(mat.n_rows);
+    auto prod = arma::vec(mat.n_rows);
     for (unsigned i = 0; i < slave_count; ++i) {
         const auto slave = i+1;
-        const auto& mat = recv_mat(slave, tag);
+        const auto mat = recv_mat(slave, tag);
         const auto offset = chunks.at(i).first;
         for (std::size_t j = 0; j < mat.n_rows; ++j) {
-            res(offset+j) = mat(j, 0);
+            prod(offset+j) = mat(j, 0);
         }
     }
 
     std::stringstream ss;
-    ss << "Result: " << std::endl << res;
+    ss << "Result: " << std::endl << prod;
     std::cout << ss.str() << std::endl;
-    assert(arma::approx_equal(res, arma::vec{1699.5f, 491.0f, -5783.5f, -53.5f}, "absdiff", 10e-5));
+    assert(arma::approx_equal(prod, arma::vec{1699.5f, 491.0f, -5783.5f, -53.5f}, "absdiff", 10e-5));
 }
 
 
@@ -92,17 +92,17 @@ void slave_do(int rank, unsigned master, unsigned tag)
     ss << "Hello from slave " << rank << "!" << std::endl;
 
     // receive from the master the submatrix to process
-    const auto& mat = recv_mat(master, tag);
+    const auto mat = recv_mat(master, tag);
     ss << "I have received" << std::endl << mat;
 
     // receive from the master the vector to process
-    const auto& vec = recv_vec(master, tag);
+    const auto vec = recv_vec(master, tag);
     ss << "and" << std::endl << vec;
 
     // compute the multiplication between the two and send the result back to the master
-    const auto& dot = mat*vec;
-    send_mat(dot, master, tag);
-    ss << "to compute" << std::endl << dot;
+    const auto prod = mat*vec;
+    send_mat(prod, master, tag);
+    ss << "to compute" << std::endl << prod;
 
     ss << "----------";
     std::cout << ss.str() << std::endl;
