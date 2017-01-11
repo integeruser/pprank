@@ -8,7 +8,7 @@ pagerank-notranspose:
 
 
 mpi-matvecprod-dense:
-	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude -Ilib \
+	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude \
 	src/nw.cpp examples/mpi-matvecprod-dense.cpp -o mpi-matvecprod-dense
 
 simd:
