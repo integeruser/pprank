@@ -32,13 +32,10 @@ std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph, 
     // initialization
     const std::size_t n = graph.edges.size();
     const auto d = 0.85f;
-    const arma::vec zeros(n, arma::fill::zeros);
+    const arma::vec ones(n, arma::fill::ones);
 
-    arma::vec p(n);
-    p.fill(1.0/n);
-
-    arma::vec lol(n);
-    lol.fill(0);
+    arma::vec p(n), p_prev;
+    p.fill(1.0f/n);
 
     arma::mat A(n, n, arma::fill::zeros);
     for (std::size_t i = 0; i < n; ++i) {
@@ -55,10 +52,11 @@ std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph, 
             }
         }
     }
+    const arma::mat& At = A.t();
     assert(slave_count <= A.n_rows);
 
-    // split the matrix in submatrices and send them to slaves
-    const auto& chunks = split(A, slave_count);
+    // split At in submatrices and send them to slaves
+    const auto chunks = split(At, slave_count);
     for (unsigned i = 0; i < slave_count; ++i) {
         const auto& chunk = chunks.at(i).second;
         const auto slave = i+1;
@@ -70,27 +68,36 @@ std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph, 
     do {
         iterations += 1;
 
-        p = lol;
-        // send p to slaves
+        p_prev = p;
+
+        // tell the slaves that there is still work to do
         for (unsigned i = 0; i < slave_count; ++i) {
-            const unsigned slave = i+1;
+            const auto slave = i+1;
             send_uns(0, slave, tag);
+        }
+
+        // send p to each slave
+        for (unsigned i = 0; i < slave_count; ++i) {
+            const auto slave = i+1;
             send_vec(p, slave, tag);
         }
 
-        arma::vec p_new(n);
-        // std::cout << "bef: " << p_new << std::endl;
-        const unsigned master = 0;
-        MPI_Reduce(zeros.memptr(), p_new.memptr(), n, MPI_DOUBLE, MPI_SUM, master, MPI_COMM_WORLD);
-        // std::cout << "aft: " << p_new << std::endl;
-        for (size_t i = 0; i < n; ++i) {
-            p_new[i] = (1.0-d)/n + d * p_new[i];
+        // receive back the matrix-vector products
+        auto prod = arma::vec(A.n_rows);
+        for (unsigned i = 0; i < slave_count; ++i) {
+            const auto slave = i+1;
+            const auto mat = recv_mat(slave, tag);
+            const auto offset = chunks.at(i).first;
+            for (std::size_t j = 0; j < mat.n_rows; ++j) {
+                prod(offset+j) = mat(j, 0);
+            }
         }
 
-        lol = p_new;
+        p = (1-d)/n * ones + d * prod;
     }
-    while (arma::norm(p-lol) >= 1E-6f);
+    while (arma::norm(p-p_prev) >= 1E-6f);
 
+    // shut down the slaves
     for (size_t slave = 1; slave <= slave_count; ++slave) {
         send_uns(0x1337, slave, tag);
     }
@@ -119,26 +126,21 @@ void master_do(char const *argv[], unsigned slave_count, unsigned tag)
 void slave_do(int rank, unsigned master, unsigned tag)
 {
     // receive from the master the submatrix to process
-    const auto& A = recv_mat(master, tag);
+    const auto At = recv_mat(master, tag);
 
     while (true) {
-        // receive from the master the status message
+        // check if there is no more work to be done
         const auto message = recv_uns(master, tag);
         if (message == 0x1337) {
             break;
         }
 
         // receive from the master the vector to process
-        const auto& p = recv_vec(master, tag);
+        const auto p = recv_vec(master, tag);
 
-        // compute the new vector
-        arma::vec p_new(p.size(), arma::fill::zeros);
-        for (std::size_t i = 0; i < A.n_rows; ++i) {
-            for (std::size_t j = 0; j < p.size(); ++j) {
-                p_new[j] += A(i, j) * p(i);
-            }
-        }
-        MPI_Reduce(p_new.memptr(), nullptr, p_new.size(), MPI_DOUBLE, MPI_SUM, master, MPI_COMM_WORLD);
+        // compute the new probabilities
+        const auto prod = At*p;
+        send_mat(prod, master, tag);
     }
 }
 
