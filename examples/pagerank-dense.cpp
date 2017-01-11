@@ -14,12 +14,12 @@ std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
     // initialization
     const std::size_t n = graph.edges.size();
     const auto d = 0.85f;
-    const auto ones = arma::ones<arma::vec>(n);
+    const arma::vec ones(n, arma::fill::ones);
 
     arma::vec p(n), p_prev;
     p.fill(1.0f/n);
 
-    arma::mat A(n, n);
+    arma::mat A(n, n, arma::fill::zeros);
     for (std::size_t i = 0; i < n; ++i) {
         const auto outdegree = graph.edges.at(i).size();
         if (outdegree == 0) {
