@@ -2,9 +2,10 @@ pagerank-dense:
 	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
 	src/ds.cpp examples/pagerank-dense.cpp -o pagerank-dense
 
-seqdense-notranspose:
+pagerank-notranspose:
 	g++-6 -Wall -O3 -std=c++17 -Iinclude -Ilib \
-	src/ds.cpp examples/seqdense-notranspose.cpp -o seqdense-notranspose
+	src/ds.cpp examples/pagerank-notranspose.cpp -o pagerank-notranspose
+
 
 mpi-matvecprod-dense:
 	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude -Ilib \
@@ -20,4 +21,4 @@ tests:
 
 
 clean:
-	rm -f mpi-matvecprod-dense pagerank-dense seqdense-notranspose simd tests
+	rm -f pagerank-dense pagerank-notranspose mpi-matvecprod-dense simd tests
