@@ -9,10 +9,10 @@
 #include "prettyprint.hpp"
 
 
-std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
+std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const size_t n = graph.edges.size();
+    const std::size_t n = graph.edges.size();
     const auto d = 0.85f;
     const auto ones = arma::ones<arma::vec>(n);
 
@@ -20,16 +20,16 @@ std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
     p.fill(1.0f/n);
 
     arma::mat A(n, n);
-    for (size_t i = 0; i < n; ++i) {
+    for (std::size_t i = 0; i < n; ++i) {
         const auto outdegree = graph.edges.at(i).size();
         if (outdegree == 0) {
             // dangling node
-            for (size_t j = 0; j < n; ++j) {
+            for (std::size_t j = 0; j < n; ++j) {
                 A(i, j) = 1.0f/n;
             }
         }
         else {
-            for (const auto j: graph.edges.at(i)) {
+            for (std::size_t j: graph.edges.at(i)) {
                 A(i, j) = 1.0f/outdegree;
             }
         }
@@ -37,7 +37,7 @@ std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
     const auto At = A.t();
 
     // ranks computation
-    size_t iterations = 0;
+    std::size_t iterations = 0;
     do {
         iterations += 1;
 
@@ -48,7 +48,7 @@ std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
 
     // map each node to its rank
     std::map<NodeIndex, float> ranks;
-    for (size_t i = 0; i < p.size(); ++i) {
+    for (std::size_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
     return std::make_pair(iterations, ranks);
