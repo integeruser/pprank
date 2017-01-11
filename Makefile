@@ -11,6 +11,9 @@ mpi-matvecprod-dense:
 	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude \
 	src/nw.cpp examples/mpi-matvecprod-dense.cpp -o mpi-matvecprod-dense
 
+mpi-pagerank-dense:
+	g++-6 -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude -Ilib \
+	src/ds.cpp src/nw.cpp examples/mpi-pagerank-dense.cpp -o mpi-pagerank-dense
 simd:
 	gcc-6 -Wall -O3 -std=c11 -msse4.1 examples/simd/simd.c -o simd
 
@@ -21,4 +24,4 @@ tests:
 
 
 clean:
-	rm -f pagerank-dense pagerank-notranspose mpi-matvecprod-dense simd tests
+	rm -f pagerank-dense pagerank-notranspose mpi-matvecprod-dense mpi-pagerank-dense simd tests
