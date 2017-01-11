@@ -16,6 +16,8 @@ struct Graph {
     std::map<NodeIndex, std::set<NodeIndex>> edges;
 
     Graph(const std::string&);
+
+    arma::mat to_dense() const;
 };
 
 

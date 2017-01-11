@@ -7,6 +7,7 @@
 
 #include "ds.hpp"
 
+#include "armadillo"
 #include "prettyprint.hpp"
 
 
@@ -36,6 +37,29 @@ Graph::Graph(const std::string& filename)
     for (NodeIndex i = 0; i < num_nodes; ++i) {
         edges.try_emplace(i);
     }
+}
+
+
+arma::mat Graph::to_dense() const
+{
+    const std::size_t n = edges.size();
+
+    arma::mat mat(n, n, arma::fill::zeros);
+    for (std::size_t i = 0; i < n; ++i) {
+        const auto outdegree = edges.at(i).size();
+        if (outdegree == 0) {
+            // dangling node
+            for (std::size_t j = 0; j < n; ++j) {
+                mat(i, j) = 1.0f/n;
+            }
+        }
+        else {
+            for (std::size_t j: edges.at(i)) {
+                mat(i, j) = 1.0f/outdegree;
+            }
+        }
+    }
+    return mat;
 }
 
 

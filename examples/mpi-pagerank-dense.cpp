@@ -37,22 +37,8 @@ std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph, 
     arma::vec p(n), p_prev;
     p.fill(1.0f/n);
 
-    arma::mat A(n, n, arma::fill::zeros);
-    for (std::size_t i = 0; i < n; ++i) {
-        const auto outdegree = graph.edges.at(i).size();
-        if (outdegree == 0) {
-            // dangling node
-            for (std::size_t j = 0; j < n; ++j) {
-                A(i, j) = 1.0f/n;
-            }
-        }
-        else {
-            for (std::size_t j: graph.edges.at(i)) {
-                A(i, j) = 1.0f/outdegree;
-            }
-        }
-    }
-    const arma::mat& At = A.t();
+    const auto A = graph.to_dense();
+    const arma::mat At = A.t();
     assert(slave_count <= A.n_rows);
 
     // split At in submatrices and send them to slaves
