@@ -63,15 +63,15 @@ arma::mat Graph::to_dense() const
 }
 
 
-CSR::CSR(const arma::mat& matrix)
+CSR::CSR(const arma::mat& mat)
 {
     ia.push_back(0);
 
     std::size_t nonzero = 0;
-    for (std::size_t i = 0; i < matrix.n_rows; ++i) {
-        for (std::size_t j = 0; j < matrix.n_cols; ++j) {
-            if (matrix(i, j) != 0.0f) {
-                a.push_back(matrix(i, j));
+    for (std::size_t i = 0; i < mat.n_rows; ++i) {
+        for (std::size_t j = 0; j < mat.n_cols; ++j) {
+            if (mat(i, j) != 0.0f) {
+                a.push_back(mat(i, j));
                 ja.push_back(j);
                 ++nonzero;
             }
@@ -80,9 +80,9 @@ CSR::CSR(const arma::mat& matrix)
     }
 
     assert(a.size() == ja.size());
-    assert(ia.size() == matrix.n_rows+1);
-    n_rows = matrix.n_rows;
-    n_cols = matrix.n_cols;
+    assert(ia.size() == mat.n_rows+1);
+    n_rows = mat.n_rows;
+    n_cols = mat.n_cols;
 }
 
 CSR::CSR(const Graph& graph)
@@ -92,7 +92,7 @@ CSR::CSR(const Graph& graph)
 
     ia.push_back(0);
 
-    std::size_t edge_count = 0;
+    std::size_t num_edges = 0;
     for (const auto& pair: graph.edges) {
         const auto& neighbors = pair.second;
 
@@ -102,8 +102,8 @@ CSR::CSR(const Graph& graph)
             ja.push_back(to_node);
         }
 
-        edge_count += neighbors.size();
-        ia.push_back(edge_count);
+        num_edges += neighbors.size();
+        ia.push_back(num_edges);
     }
 
     assert(a.size() == ja.size());
