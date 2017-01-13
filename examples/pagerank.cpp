@@ -11,10 +11,12 @@
 #include "prettyprint.hpp"
 
 
-std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const arma::sp_fmat& A)
+std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const arma::sp_fmat& adjmat)
 {
     // initialization
-    assert(A.n_rows == A.n_cols);
+    assert(adjmat.n_rows == adjmat.n_cols);
+
+    const auto A = adjmat;
     const auto At = A.t();
 
     const size_t n = A.n_rows;
@@ -52,9 +54,9 @@ int main(int argc, char const *argv[])
     }
 
     const auto filename = argv[1];
-    const auto adjacency_mat = load(filename);
+    const auto adjmat = load(filename);
 
-    const auto results = pagerank(adjacency_mat);
+    const auto results = pagerank(adjmat);
     const auto iterations = results.first;
     const auto ranks = results.second;
     std::cout << "Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
