@@ -8,7 +8,6 @@
 #include "ds.hpp"
 
 #include "armadillo"
-#include "prettyprint.hpp"
 
 
 Graph::Graph(const std::string& filename)
@@ -40,11 +39,11 @@ Graph::Graph(const std::string& filename)
 }
 
 
-arma::mat Graph::to_dense() const
+arma::sp_mat Graph::to_sp_mat() const
 {
     const std::size_t n = edges.size();
 
-    arma::mat mat(n, n, arma::fill::zeros);
+    arma::sp_mat mat(n, n);
     for (std::size_t i = 0; i < n; ++i) {
         const auto outdegree = edges.at(i).size();
         if (outdegree == 0) {

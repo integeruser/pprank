@@ -10,21 +10,21 @@
 #include "prettyprint.hpp"
 
 
-std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
+std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const std::size_t n = graph.edges.size();
+    const size_t n = graph.edges.size();
     const auto d = 0.85f;
     const arma::vec ones(n, arma::fill::ones);
 
     arma::vec p(n), p_prev;
     p.fill(1.0f/n);
 
-    const auto A = graph.to_dense();
-    const arma::mat At = A.t();
+    const auto A = graph.to_sp_mat();
+    const arma::sp_mat At = A.t();
 
     // ranks computation
-    std::size_t iterations = 0;
+    size_t iterations = 0;
     do {
         iterations += 1;
 
@@ -35,7 +35,7 @@ std::pair<std::size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
 
     // map each node to its rank
     std::map<NodeIndex, float> ranks;
-    for (std::size_t i = 0; i < p.size(); ++i) {
+    for (size_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
     return std::make_pair(iterations, ranks);

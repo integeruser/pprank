@@ -17,7 +17,7 @@ struct Graph {
 
     Graph(const std::string&);
 
-    arma::mat to_dense() const;
+    arma::sp_mat to_sp_mat() const;
 };
 
 
