@@ -1,6 +1,6 @@
 pagerank:
 	g++-6 -std=c++17 -O3 -Wall -o pagerank \
-	src/ds.cpp examples/pagerank.cpp \
+	src/utils.cpp examples/pagerank.cpp \
 	-Iinclude -Ilib -larmadillo
 
 pagerank-notranspose:

@@ -1,27 +1,29 @@
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <map>
 #include <utility>
 
-#include "ds.hpp"
+#include "utils.hpp"
 
 #include "armadillo"
 #include "prettyprint.hpp"
 
 
-std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
+std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const arma::sp_fmat& A)
 {
     // initialization
-    const size_t n = graph.edges.size();
-    const auto d = 0.85f;
-    const arma::vec ones(n, arma::fill::ones);
+    assert(A.n_rows == A.n_cols);
+    const auto At = A.t();
 
-    arma::vec p(n), p_prev;
+    const size_t n = A.n_rows;
+
+    arma::fvec p(n), p_prev;
     p.fill(1.0f/n);
 
-    const auto A = graph.to_sp_mat();
-    const arma::sp_mat At = A.t();
+    const arma::fvec ones(n, arma::fill::ones);
+    const auto d = 0.85f;
 
     // ranks computation
     size_t iterations = 0;
@@ -34,7 +36,7 @@ std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
     while (arma::norm(p-p_prev) >= 1E-6f);
 
     // map each node to its rank
-    std::map<NodeIndex, float> ranks;
+    std::map<uint_fast32_t, float> ranks;
     for (size_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
@@ -50,10 +52,9 @@ int main(int argc, char const *argv[])
     }
 
     const auto filename = argv[1];
-    const auto graph = Graph(filename);
-    std::cout << "Edges: " << graph.edges << std::endl;
+    const auto adjacency_mat = load(filename);
 
-    const auto results = pagerank(graph);
+    const auto results = pagerank(adjacency_mat);
     const auto iterations = results.first;
     const auto ranks = results.second;
     std::cout << "Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
