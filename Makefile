@@ -1,6 +1,6 @@
 pagerank-dense:
-	g++-6 -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
-	src/ds.cpp examples/pagerank-dense.cpp -o pagerank-dense
+	g++-6 -Wall -O3 -std=c++17 -O2 -o pagerank-dense \
+	src/ds.cpp examples/pagerank-dense.cpp -Iinclude -Ilib -larmadillo
 
 pagerank-notranspose:
 	g++-6 -Wall -O3 -std=c++17 -Iinclude -Ilib \
