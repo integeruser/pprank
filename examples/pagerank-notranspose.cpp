@@ -16,10 +16,10 @@
 float dist(const std::vector<float>& a, const std::vector<float>& b)
 {
     assert(a.size() == b.size());
-    const auto n = a.size();
+    const size_t n = a.size();
 
     float d = 0.0f;
-    for (size_t i = 0; i < n; ++i) {
+    for (uint_fast32_t i = 0; i < n; ++i) {
         d += std::pow(a[i]-b[i], 2);
     }
     return std::sqrt(d);
@@ -65,7 +65,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (size_t i = 0; i < p.size(); ++i) {
+    for (uint_fast32_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
     return std::make_pair(iterations, ranks);

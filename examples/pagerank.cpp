@@ -36,7 +36,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (size_t i = 0; i < p.size(); ++i) {
+    for (uint_fast32_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
     return std::make_pair(iterations, ranks);
