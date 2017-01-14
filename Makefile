@@ -1,11 +1,11 @@
-pagerank:
-	$(CXX) -std=c++17 -O3 -Wall -o pagerank \
-	src/utils.cpp examples/pagerank.cpp \
-	-Iinclude -larmadillo
-
 pagerank-notranspose:
 	$(CXX) -std=c++17 -O3 -Wall -o pagerank-notranspose \
 	src/utils.cpp examples/pagerank-notranspose.cpp \
+	-Iinclude
+
+pagerank:
+	$(CXX) -std=c++17 -O3 -Wall -o pagerank \
+	src/utils.cpp examples/pagerank.cpp \
 	-Iinclude -larmadillo
 
 
