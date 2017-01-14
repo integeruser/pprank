@@ -1,10 +1,10 @@
 pagerank:
 	$(CXX) -std=c++17 -O3 -Wall -o pagerank \
 	src/utils.cpp examples/pagerank.cpp \
-	-Iinclude -Ilib -larmadillo
+	-Iinclude -larmadillo
 
 pagerank-notranspose:
-	$(CXX) -Wall -O3 -std=c++17 -Iinclude -Ilib \
+	$(CXX) -Wall -O3 -std=c++17 -Iinclude \
 	src/ds.cpp examples/pagerank-notranspose.cpp -o pagerank-notranspose
 
 
@@ -13,10 +13,10 @@ mpi-matvecprod-dense:
 	src/nw.cpp examples/mpi-matvecprod-dense.cpp -o mpi-matvecprod-dense
 
 mpi-pagerank-dense:
-	$(CXX) -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude -Ilib \
+	$(CXX) -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude \
 	src/ds.cpp src/nw.cpp examples/mpi-pagerank-dense.cpp -o mpi-pagerank-dense
 ompcpp:
-	$(CXX) -Wall -O3 -std=c++17 -larmadillo -fopenmp -Iinclude -Ilib \
+	$(CXX) -Wall -O3 -std=c++17 -larmadillo -fopenmp -Iinclude \
 	examples/omp.cpp -o ompcpp
 
 
@@ -26,12 +26,12 @@ simd:
 
 
 pprank:
-	$(CXX) -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude -Ilib \
+	$(CXX) -Wall -O3 -std=c++17 -larmadillo -lmpi -Iinclude \
 	src/ds.cpp src/nw.cpp src/main.cpp -o pprank
 
 
 tests:
-	$(CXX) -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
+	$(CXX) -Wall -O3 -std=c++17 -larmadillo -Iinclude \
 	src/ds.cpp test/main.cpp -o tests
 
 
@@ -41,5 +41,5 @@ clean:
 
 
 prove:
-	$(CXX) -Wall -O3 -std=c++17 -larmadillo -Iinclude -Ilib \
+	$(CXX) -Wall -O3 -std=c++17 -larmadillo -Iinclude \
 	prove.cpp -o prove
