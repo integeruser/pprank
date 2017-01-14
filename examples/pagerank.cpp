@@ -30,6 +30,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
         iterations += 1;
 
         p_prev = p;
+
         p = (1-d)/n * ones + d * (At*p);
     }
     while (arma::norm(p-p_prev) >= 1E-6f);
