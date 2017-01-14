@@ -1,4 +1,3 @@
-#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -14,10 +13,10 @@
 std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
+    const size_t n = graph.num_nodes;
+
     const auto A = to_adjacency_mat(graph);
     const auto At = A.t();
-
-    const size_t n = A.n_rows;
 
     arma::fvec p(n), p_prev;
     p.fill(1.0f/n);
