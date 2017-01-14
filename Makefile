@@ -4,8 +4,9 @@ pagerank:
 	-Iinclude -larmadillo
 
 pagerank-notranspose:
-	$(CXX) -Wall -O3 -std=c++17 -Iinclude \
-	src/ds.cpp examples/pagerank-notranspose.cpp -o pagerank-notranspose
+	$(CXX) -std=c++17 -O3 -Wall -o pagerank-notranspose \
+	src/utils.cpp examples/pagerank-notranspose.cpp \
+	-Iinclude -larmadillo
 
 
 mpi-matvecprod-dense:

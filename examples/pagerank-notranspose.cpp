@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "ds.hpp"
+#include "utils.hpp"
 
 #include "prettyprint.hpp"
 
@@ -25,13 +25,14 @@ float dist(const std::vector<float>& a, const std::vector<float>& b)
     return std::sqrt(d);
 }
 
-std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
+std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const size_t n = graph.edges.size();
-    const auto d = 0.85f;
+    const size_t n = graph.num_nodes;
 
     std::vector<float> p(n), p_new(n, 1.0f/n);
+
+    const auto d = 0.85f;
 
     // ranks computation
     size_t iterations = 0;
@@ -39,32 +40,31 @@ std::pair<size_t, std::map<NodeIndex, float>> pagerank(const Graph& graph)
         iterations += 1;
 
         p = p_new;
+        std::fill(p_new.begin(), p_new.end(), 0.0f);
 
         // to avoid storing A in memory recompute its rows at every iteration
-        std::fill(p_new.begin(), p_new.end(), 0.0f);
-        for (size_t i = 0; i < n; ++i) {
-            const auto outdegree = graph.edges.at(i).size();
+        for (uint_fast32_t i = 0; i < n; ++i) {
+            const auto outdegree = graph.edges.count(i) > 0 ? graph.edges.at(i).size() : 0;
             if (outdegree == 0) {
                 // dangling node
-                for (size_t j = 0; j < n; ++j) {
+                for (uint_fast32_t j = 0; j < n; ++j) {
                     p_new[j] += (1.0f/n) * p[i];
                 }
             }
             else {
-                for (size_t j: graph.edges.at(i)) {
+                for (uint_fast32_t j: graph.edges.at(i)) {
                     p_new[j] += (1.0f/outdegree) * p[i];
                 }
             }
         }
-
-        for (size_t i = 0; i < n; ++i) {
+        for (uint_fast32_t i = 0; i < n; ++i) {
             p_new[i] = (1.0f-d)/n + d * p_new[i];
         }
     }
     while (dist(p, p_new) >= 1E-6f);
 
     // map each node to its rank
-    std::map<NodeIndex, float> ranks;
+    std::map<uint_fast32_t, float> ranks;
     for (size_t i = 0; i < p.size(); ++i) {
         ranks[i] = p[i];
     }
@@ -81,7 +81,7 @@ int main(int argc, char const *argv[])
 
     const auto filename = argv[1];
     const auto graph = Graph(filename);
-    std::cout << "Edges: " << graph.edges << std::endl;
+    std::cout << "Edges: " << graph.edges.size() << std::endl;
 
     const auto results = pagerank(graph);
     const auto iterations = results.first;
