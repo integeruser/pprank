@@ -53,7 +53,7 @@ int main(int argc, char const *argv[])
 
     const auto filename = argv[1];
     const auto graph = Graph(filename);
-    std::cout << "Edges: " << graph.edges.size() << std::endl;
+    std::cout << "Nodes: " << graph.num_nodes << std::endl;
 
     const auto results = pagerank(graph);
     const auto iterations = results.first;
