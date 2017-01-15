@@ -15,9 +15,9 @@ pagerank-csr:
 
 
 mpi-pagerank-csr:
-	$(CXX) -std=c++17 -O3 -Wall -o mpi-pagerank-csr \
+	mpic++ -std=c++17 -O3 -Wall -o mpi-pagerank-csr \
 	src/nw.cpp src/utils.cpp examples/mpi-pagerank-csr.cpp \
-	-Iinclude -larmadillo -lmpi
+	-Iinclude -larmadillo
 
 
 all:
