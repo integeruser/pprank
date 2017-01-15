@@ -77,13 +77,13 @@ std::vector<float> recv_csr_vec_f(unsigned source, unsigned tag)
 
 void send_csr_vec_i(const std::vector<uint_fast32_t>& vec, unsigned destination, unsigned tag)
 {
-    MPI_Send(vec.data(), vec.size(), MPI_UNSIGNED, destination, tag, MPI_COMM_WORLD);
+    MPI_Send(vec.data(), vec.size(), MPI_UNSIGNED_LONG, destination, tag, MPI_COMM_WORLD);
 }
 
 std::vector<uint_fast32_t> recv_csr_vec_i(unsigned source, unsigned tag)
 {
     std::vector<uint_fast32_t> vec(probe(source, tag));
-    MPI_Recv(vec.data(), vec.size(), MPI_UNSIGNED, source, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(vec.data(), vec.size(), MPI_UNSIGNED_LONG, source, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     return vec;
 }
 
