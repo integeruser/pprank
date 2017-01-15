@@ -44,7 +44,8 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
         // to avoid storing A in memory recompute its rows at every iteration
         for (uint_fast32_t i = 0; i < n; ++i) {
-            const auto outdegree = graph.edges.count(i) > 0 ? graph.edges.at(i).size() : 0;
+            const auto outdegree = graph.out_edges.count(i) > 0 ?
+                                   graph.out_edges.at(i).size() : 0;
             if (outdegree == 0) {
                 // dangling node
                 for (uint_fast32_t j = 0; j < n; ++j) {
@@ -52,7 +53,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
                 }
             }
             else {
-                for (uint_fast32_t j: graph.edges.at(i)) {
+                for (uint_fast32_t j: graph.out_edges.at(i)) {
                     p_new[j] += (1.0f/outdegree) * p[i];
                 }
             }

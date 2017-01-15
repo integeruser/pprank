@@ -29,8 +29,8 @@ Graph::Graph(const std::string& filename)
             continue;
         }
 
-        edges[from_node].insert(to_node);
-        inv_edges[to_node].insert(from_node);
+        in_edges[to_node].insert(from_node);
+        out_edges[from_node].insert(to_node);
 
         num_nodes = std::max(std::max(from_node, to_node), num_nodes);
     }
@@ -46,7 +46,7 @@ arma::sp_fmat to_adjacency_mat(const Graph& graph)
     // convert the graph to a sparse adjacency matrix
     arma::sp_fmat adjacency_mat(graph.num_nodes, graph.num_nodes);
     for (uint_fast32_t i = 0; i < graph.num_nodes; ++i) {
-        const auto outdegree = graph.edges.count(i) > 0 ? graph.edges.at(i).size() : 0;
+        const auto outdegree = graph.out_edges.count(i) > 0 ? graph.out_edges.at(i).size() : 0;
         if (outdegree == 0) {
             // dangling node
             for (uint_fast32_t j = 0; j < graph.num_nodes; ++j) {
@@ -54,7 +54,7 @@ arma::sp_fmat to_adjacency_mat(const Graph& graph)
             }
         }
         else {
-            for (uint_fast32_t j: graph.edges.at(i)) {
+            for (uint_fast32_t j: graph.out_edges.at(i)) {
                 adjacency_mat(i, j) = 1.0f/outdegree;
             }
         }
@@ -70,7 +70,7 @@ CSC::CSC(const Graph& graph)
     // find nodes without outgoing edges
     std::set<uint_fast32_t> dangling_nodes;
     for (uint_fast32_t node = 0; node < graph.num_nodes; ++node) {
-        if (graph.edges.count(node) == 0) {
+        if (graph.out_edges.count(node) == 0) {
             dangling_nodes.insert(node);
         }
     }
@@ -79,8 +79,8 @@ CSC::CSC(const Graph& graph)
     ia.push_back(num_values);
 
     for (uint_fast32_t to_node = 0; to_node < graph.num_nodes; ++to_node) {
-        const auto& in_nodes = graph.inv_edges.count(to_node) > 0 ?
-                               graph.inv_edges.at(to_node) :
+        const auto& in_nodes = graph.in_edges.count(to_node) > 0 ?
+                               graph.in_edges.at(to_node) :
                                std::set<uint_fast32_t>();
 
         // find which rows have a value (different from zero)
