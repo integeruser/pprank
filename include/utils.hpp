@@ -19,9 +19,6 @@ struct Graph {
 };
 
 
-arma::sp_fmat to_adjacency_mat(const Graph&);
-
-
 struct CSC {
     size_t num_rows, num_cols;
     std::vector<float> a;

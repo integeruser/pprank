@@ -41,28 +41,6 @@ Graph::Graph(const std::string& filename)
 }
 
 
-arma::sp_fmat to_adjacency_mat(const Graph& graph)
-{
-    // convert the graph to a sparse adjacency matrix
-    arma::sp_fmat adjacency_mat(graph.num_nodes, graph.num_nodes);
-    for (uint_fast32_t i = 0; i < graph.num_nodes; ++i) {
-        const auto outdegree = graph.out_edges.count(i) > 0 ? graph.out_edges.at(i).size() : 0;
-        if (outdegree == 0) {
-            // dangling node
-            for (uint_fast32_t j = 0; j < graph.num_nodes; ++j) {
-                adjacency_mat(i, j) = 1.0f/graph.num_nodes;
-            }
-        }
-        else {
-            for (uint_fast32_t j: graph.out_edges.at(i)) {
-                adjacency_mat(i, j) = 1.0f/outdegree;
-            }
-        }
-    }
-    return adjacency_mat;
-}
-
-
 CSC::CSC(const Graph& graph)
 {
     num_rows = num_cols = graph.num_nodes;

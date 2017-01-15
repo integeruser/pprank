@@ -10,6 +10,26 @@
 #include "prettyprint.hpp"
 
 
+arma::sp_fmat to_adjacency_mat(const Graph& graph)
+{
+    arma::sp_fmat adjmat(graph.num_nodes, graph.num_nodes);
+    for (uint_fast32_t i = 0; i < graph.num_nodes; ++i) {
+        const auto outdegree = graph.out_edges.count(i) > 0 ? graph.out_edges.at(i).size() : 0;
+        if (outdegree == 0) {
+            // dangling node
+            for (uint_fast32_t j = 0; j < graph.num_nodes; ++j) {
+                adjmat(i, j) = 1.0f/graph.num_nodes;
+            }
+        }
+        else {
+            for (uint_fast32_t j: graph.out_edges.at(i)) {
+                adjmat(i, j) = 1.0f/outdegree;
+            }
+        }
+    }
+    return adjmat;
+}
+
 std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
