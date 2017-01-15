@@ -32,7 +32,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
     std::vector<float> p(n), p_new(n, 1.0f/n);
 
-    const auto d = 0.85f;
+    const float d = 0.85f;
 
     // ranks computation
     size_t iterations = 0;

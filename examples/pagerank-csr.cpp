@@ -15,14 +15,14 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     // initialization
     const size_t n = graph.num_nodes;
 
-    const auto A = CSC(graph);
-    const auto At = transpose(A);
+    const CSC A = CSC(graph);
+    const CSR At = transpose(A);
 
     arma::fvec p(n), p_prev;
     p.fill(1.0f/n);
 
     const arma::fvec ones(n, arma::fill::ones);
-    const auto d = 0.85f;
+    const float d = 0.85f;
 
     // ranks computation
     size_t iterations = 0;

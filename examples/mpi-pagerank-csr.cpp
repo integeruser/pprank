@@ -55,10 +55,10 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, u
         // receive back from the slaves the matrix-vector products
         arma::fvec prod(n);
         for (unsigned slave = 1; slave <= num_slaves; ++slave) {
-            const size_t offset = blocks.at(slave-1).first;
+            const uint_fast32_t offset = blocks.at(slave-1).first;
 
             const arma::fvec vec = recv_vec(slave, TAG);
-            for (size_t i = 0; i < vec.size(); ++i) {
+            for (uint_fast32_t i = 0; i < vec.size(); ++i) {
                 prod(offset+i) = vec(i);
             }
         }

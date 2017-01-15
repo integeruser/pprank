@@ -35,14 +35,14 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     // initialization
     const size_t n = graph.num_nodes;
 
-    const auto A = to_adjacency_mat(graph);
-    const auto At = A.t();
+    const arma::sp_fmat A = to_adjacency_mat(graph);
+    const arma::sp_fmat At = A.t();
 
     arma::fvec p(n), p_prev;
     p.fill(1.0f/n);
 
     const arma::fvec ones(n, arma::fill::ones);
-    const auto d = 0.85f;
+    const float d = 0.85f;
 
     // ranks computation
     size_t iterations = 0;
