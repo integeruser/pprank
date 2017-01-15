@@ -7,6 +7,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "utils.hpp"
 
@@ -83,21 +84,63 @@ arma::fvec CSR::operator*(const arma::fvec& vec) const
 {
     // see http://www.mathcs.emory.edu/~cheung/Courses/561/Syllabus/3-C/sparse.html
     arma::fvec x = arma::zeros<arma::fvec>(num_rows);
-    for (std::size_t i = 0; i < num_rows; ++i) {
+    for (size_t i = 0; i < num_rows; ++i) {
         if (ia[i] == ia[i+1]) {
             // TO CHECK
             // std::cout << "SUCA" << std::endl;
-            // for (std::size_t k = 0; k < num_rows; ++k) {
+            // for (size_t k = 0; k < num_rows; ++k) {
             //     x[i] += (1.0f/num_rows) * vec[k];
             // }
         }
         else {
-            for (std::size_t k = ia[i]; k < ia[i+1]; ++k) {
+            for (size_t k = ia[i]; k < ia[i+1]; ++k) {
                 x[i] = x[i] + a[k] * vec[ja[k]];
             }
         }
     }
     return x;
+}
+
+std::vector<std::pair<int, CSR>> CSR::split(size_t n) const
+{
+    assert(0 < n and n <= num_rows);
+
+    // compute maximum size of each submatrix
+    // note that the last submatrix can have a smaller size than the others
+    const size_t size = ceil(float(num_rows)/n);
+
+    int totoff = 0;
+    std::vector<std::pair<int, CSR>> csrs;
+    size_t i = 1, j = 0;
+    size_t offset = 0;
+    do {
+        auto subcsr = CSR();
+
+        subcsr.ia.push_back(0);
+        for (size_t k = 0; i < ia.size() && k < size; ++k) {
+            subcsr.ia.push_back(ia[i] - offset);
+            ++i;
+        }
+        offset += subcsr.ia.back();
+        assert(((csrs.size() < n-1) and subcsr.ia.size() == size+1) or
+               ((csrs.size() == n-1) and subcsr.ia.size() <= size+1));
+
+        for (size_t k = 0; k < subcsr.ia.back(); ++k) {
+            subcsr.a.push_back(a[j]);
+            subcsr.ja.push_back(ja[j]);
+            ++j;
+        }
+
+        subcsr.num_rows = subcsr.ia.size()-1;
+        subcsr.num_cols = num_cols;
+        csrs.push_back(std::make_pair(totoff, subcsr));
+        totoff += size;
+    }
+    while (csrs.size() < n);
+
+    assert(i == ia.size());
+    assert(j == a.size() and j == ja.size());
+    return csrs;
 }
 
 

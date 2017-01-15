@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "armadillo"
@@ -39,6 +40,8 @@ struct CSR {
     CSR(const Graph&);
 
     arma::fvec operator*(const arma::fvec&) const;
+
+    std::vector<std::pair<int, CSR>> split(size_t) const;
 };
 
 CSR transpose(const CSC&);

@@ -14,8 +14,14 @@ pagerank-csr:
 	-Iinclude -larmadillo
 
 
+mpi-pagerank-csr:
+	$(CXX) -std=c++17 -O3 -Wall -o mpi-pagerank-csr \
+	src/nw.cpp src/utils.cpp examples/mpi-pagerank-csr.cpp \
+	-Iinclude -larmadillo -lmpi
+
+
 all:
-	make pagerank-notranspose pagerank pagerank-csr
+	make pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr
 
 clean:
-	rm -f pagerank-notranspose pagerank pagerank-csr
+	rm -f pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr
