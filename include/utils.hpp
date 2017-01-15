@@ -21,7 +21,7 @@ struct Graph {
 
 
 struct CSC {
-    size_t num_rows, num_cols;
+    uint_fast32_t num_rows, num_cols;
     std::vector<float> a;
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
@@ -31,7 +31,7 @@ struct CSC {
 };
 
 struct CSR {
-    size_t num_rows, num_cols;
+    uint_fast32_t num_rows, num_cols;
     std::vector<float> a;
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
@@ -41,7 +41,7 @@ struct CSR {
 
     arma::fvec operator*(const arma::fvec&) const;
 
-    std::vector<std::pair<int, CSR>> split(size_t) const;
+    std::vector<std::pair<uint_fast32_t, CSR>> split(uint_fast32_t) const;
 };
 
 CSR transpose(const CSC&);

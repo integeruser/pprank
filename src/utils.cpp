@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "utils.hpp"
 
@@ -54,15 +55,15 @@ CSC::CSC(const Graph& graph)
         }
     }
 
-    uint_fast32_t num_values = 0;
-    ia.push_back(num_values);
+    uint_fast32_t num_nonzero_values = 0;
+    ia.push_back(num_nonzero_values);
 
     for (uint_fast32_t to_node = 0; to_node < graph.num_nodes; ++to_node) {
-        const auto& in_nodes = graph.in_edges.count(to_node) > 0 ?
-                               graph.in_edges.at(to_node) :
-                               std::set<uint_fast32_t>();
+        const auto in_nodes = graph.in_edges.count(to_node) > 0 ?
+                              graph.in_edges.at(to_node) :
+                              std::set<uint_fast32_t>();
 
-        // find which rows have a value (different from zero)
+        // find which rows have some value different from zero
         auto from_nodes = in_nodes;
         from_nodes.insert(dangling_nodes.begin(), dangling_nodes.end());
 
@@ -74,50 +75,43 @@ CSC::CSC(const Graph& graph)
             a.push_back(weight);
             ja.push_back(from_node);
         }
-        num_values += from_nodes.size();
-        ia.push_back(num_values);
+        num_nonzero_values += from_nodes.size();
+        ia.push_back(num_nonzero_values);
     }
 }
 
 
 arma::fvec CSR::operator*(const arma::fvec& vec) const
 {
-    // see http://www.mathcs.emory.edu/~cheung/Courses/561/Syllabus/3-C/sparse.html
-    arma::fvec x = arma::zeros<arma::fvec>(num_rows);
-    for (size_t i = 0; i < num_rows; ++i) {
-        if (ia[i] == ia[i+1]) {
-            // TO CHECK
-            // std::cout << "SUCA" << std::endl;
-            // for (size_t k = 0; k < num_rows; ++k) {
-            //     x[i] += (1.0f/num_rows) * vec[k];
-            // }
-        }
-        else {
-            for (size_t k = ia[i]; k < ia[i+1]; ++k) {
-                x[i] = x[i] + a[k] * vec[ja[k]];
-            }
+    assert(num_cols == vec.size());
+
+    arma::fvec res(num_rows, arma::fill::zeros);
+    for (uint_fast32_t i = 0; i < num_rows; ++i) {
+        for (uint_fast32_t k = ia[i]; k < ia[i+1]; ++k) {
+            res[i] += a[k] * vec[ja[k]];
         }
     }
-    return x;
+    return res;
 }
 
-std::vector<std::pair<int, CSR>> CSR::split(size_t n) const
+std::vector<std::pair<uint_fast32_t, CSR>> CSR::split(uint_fast32_t n) const
 {
+    // TODO clean
     assert(0 < n and n <= num_rows);
 
     // compute maximum size of each submatrix
     // note that the last submatrix can have a smaller size than the others
-    const size_t size = ceil(float(num_rows)/n);
+    const uint_fast32_t size = ceil(float(num_rows)/n);
 
     int totoff = 0;
-    std::vector<std::pair<int, CSR>> csrs;
-    size_t i = 1, j = 0;
-    size_t offset = 0;
+    std::vector<std::pair<uint_fast32_t, CSR>> csrs;
+    uint_fast32_t i = 1, j = 0;
+    uint_fast32_t offset = 0;
     do {
         auto subcsr = CSR();
 
         subcsr.ia.push_back(0);
-        for (size_t k = 0; i < ia.size() && k < size; ++k) {
+        for (uint_fast32_t k = 0; i < ia.size() && k < size; ++k) {
             subcsr.ia.push_back(ia[i] - offset);
             ++i;
         }
@@ -125,7 +119,7 @@ std::vector<std::pair<int, CSR>> CSR::split(size_t n) const
         assert(((csrs.size() < n-1) and subcsr.ia.size() == size+1) or
                ((csrs.size() == n-1) and subcsr.ia.size() <= size+1));
 
-        for (size_t k = 0; k < subcsr.ia.back(); ++k) {
+        for (uint_fast32_t k = 0; k < subcsr.ia.back(); ++k) {
             subcsr.a.push_back(a[j]);
             subcsr.ja.push_back(ja[j]);
             ++j;
