@@ -45,10 +45,11 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, u
 
         p_prev = p;
 
-        // send p to the slaves
+        // tell the slaves that there is still work to do
+        unsigned msg = 0x42;
+        MPI_Bcast(&msg, 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
+        // broadcast p to the slaves
         for (unsigned slave = 1; slave <= num_slaves; ++slave) {
-            // tell the slaves that there is still work to do
-            send_uns(0x42, slave, TAG);
             send_vec(p, slave, TAG);
         }
 
@@ -68,9 +69,8 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, u
     while (arma::norm(p-p_prev) >= 1E-6f);
 
     // shut down the slaves
-    for (unsigned slave = 1; slave <= num_slaves; ++slave) {
-        send_uns(0x1337, slave, TAG);
-    }
+    unsigned msg = 0x1337;
+    MPI_Bcast(&msg, 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
@@ -100,7 +100,9 @@ void slave_do(int rank)
 
     while (true) {
         // check if there is still work to do
-        const unsigned msg = recv_uns(MASTER, TAG);
+        unsigned msg;
+        MPI_Bcast(&msg, 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
+        // const unsigned msg = recv_uns(MASTER, TAG);
         if (msg == 0x1337) {
             break;
         }
