@@ -19,7 +19,8 @@
 std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, unsigned num_slaves)
 {
     // initialization
-    const size_t n = graph.num_nodes;
+    uint_fast32_t n = graph.num_nodes;
+    MPI_Bcast(&n, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
 
     const CSC A = CSC(graph);
     const CSR At = transpose(A);
@@ -49,9 +50,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, u
         unsigned msg = 0x42;
         MPI_Bcast(&msg, 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
         // broadcast p to the slaves
-        for (unsigned slave = 1; slave <= num_slaves; ++slave) {
-            send_vec(p, slave, TAG);
-        }
+        MPI_Bcast(p.memptr(), n, MPI_FLOAT, MASTER, MPI_COMM_WORLD);
 
         // receive back from the slaves the matrix-vector products
         arma::fvec prod(n);
@@ -95,6 +94,9 @@ void master_do(char const *argv[], unsigned num_slaves)
 
 void slave_do(int rank)
 {
+    uint_fast32_t n;
+    MPI_Bcast(&n, 1, MPI_UNSIGNED_LONG, MASTER, MPI_COMM_WORLD);
+
     // receive the matrix to process
     const CSR csr = recv_csr(MASTER, TAG);
 
@@ -108,7 +110,8 @@ void slave_do(int rank)
         }
 
         // receive the vector to process
-        const arma::fvec vec = recv_vec(MASTER, TAG);
+        arma::fvec vec(n);
+        MPI_Bcast(vec.memptr(), n, MPI_FLOAT, MASTER, MPI_COMM_WORLD);
         // compute and send back the matrix-vector product
         send_vec(csr*vec, MASTER, TAG);
     }
