@@ -52,12 +52,10 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
         // gather the results of the matrix-vector products
         arma::fvec prod(n);
-        MPI_Gatherv(prod_block.memptr(), blocks_num_rows[rank], MPI_FLOAT,
-                    prod.memptr(), blocks_num_rows.data(), blocks_displacements.data(), MPI_FLOAT,
-                    MASTER, MPI_COMM_WORLD);
+        MPI_Allgatherv(prod_block.memptr(), blocks_num_rows[rank], MPI_FLOAT,
+                    prod.memptr(), blocks_num_rows.data(), blocks_displacements.data(), MPI_FLOAT, MPI_COMM_WORLD);
 
         p = (1-d)/n * ones + d * (prod);
-        MPI_Bcast(p.memptr(), n, MPI_FLOAT, MASTER, MPI_COMM_WORLD);
     }
     while (arma::norm(p-p_prev) >= 1E-6f);
 
