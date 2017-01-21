@@ -5,16 +5,16 @@ This repository contains a parallel implementation of [PageRank](https://en.wiki
 ## Requisites
 The code is based on [Armadillo](http://arma.sourceforge.net/) v7.600.2 (a C++ linear algebra library) and [MPICH](https://www.mpich.org/) v3.2 (an implementation of the MPI standard). The code was compiled using [GCC](https://gcc.gnu.org/) v6.3.0.
 
-On Ubuntu and similar, you can install the dependencies via `apt`:
+On Ubuntu and similar, you can install the required dependencies via `apt`:
 ```
-$ apt-get install mpich libarmadillo-dev
+$ apt-get install build-essential mpich libarmadillo-dev
 ```
 
 On Mac OS, use [Homebrew](http://brew.sh/):
 ```
 $ brew install gcc --without-multilib
-$ brew install homebrew/science/armadillo
 $ HOMEBREW_CC=gcc-6 HOMEBREW_CXX=g++-6 brew install mpich --build-from-source
+$ brew install homebrew/science/armadillo
 ```
 
 
