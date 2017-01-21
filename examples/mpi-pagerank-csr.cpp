@@ -39,6 +39,9 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
         blocks_num_rows.push_back(block.second.num_rows);
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
+    const double start_time = MPI_Wtime();
+
     // ranks computation
     uint_fast32_t iterations = 0;
     do {
@@ -58,6 +61,8 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
         p = (1-d)/n * ones + d * (prod);
     }
     while (arma::norm(p-p_prev) >= 1E-6f);
+
+    const double finish_time = MPI_Wtime();
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
