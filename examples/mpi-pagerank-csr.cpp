@@ -12,8 +12,11 @@
 
 #define MASTER 0
 
+int rank;
+int num_processes;
 
-std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, int rank, int num_processes)
+
+std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
     const uint_fast32_t n = graph.num_nodes;
@@ -71,10 +74,7 @@ int main(int argc, char *argv[])
 {
     MPI_Init(&argc, &argv);
 
-    int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    int num_processes;
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
     if (argc != 2) {
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         std::cout << "Nodes: " << graph.num_nodes << std::endl;
     }
 
-    const auto results = pagerank(graph, rank, num_processes);
+    const auto results = pagerank(graph);
     if (rank == MASTER) {
         const auto iterations = results.first;
         const auto ranks = results.second;
