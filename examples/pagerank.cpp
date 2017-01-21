@@ -33,7 +33,7 @@ arma::sp_fmat to_adjacency_mat(const Graph& graph)
 std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const size_t n = graph.num_nodes;
+    const uint_fast32_t n = graph.num_nodes;
 
     const arma::sp_fmat A = to_adjacency_mat(graph);
     const arma::sp_fmat At = A.t();
@@ -45,9 +45,9 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     const float d = 0.85f;
 
     // ranks computation
-    size_t iterations = 0;
+    uint_fast32_t iterations = 0;
     do {
-        iterations += 1;
+        ++iterations;
 
         p_prev = p;
 

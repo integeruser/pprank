@@ -28,16 +28,16 @@ float dist(const std::vector<float>& a, const std::vector<float>& b)
 std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const size_t n = graph.num_nodes;
+    const uint_fast32_t n = graph.num_nodes;
 
     std::vector<float> p(n), p_new(n, 1.0f/n);
 
     const float d = 0.85f;
 
     // ranks computation
-    size_t iterations = 0;
+    uint_fast32_t iterations = 0;
     do {
-        iterations += 1;
+        ++iterations;
 
         p = p_new;
         std::fill(p_new.begin(), p_new.end(), 0.0f);

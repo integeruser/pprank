@@ -13,7 +13,7 @@
 std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
-    const size_t n = graph.num_nodes;
+    const uint_fast32_t n = graph.num_nodes;
 
     const CSC A = CSC(graph);
     const CSR At = transpose(A);
@@ -25,9 +25,9 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     const float d = 0.85f;
 
     // ranks computation
-    size_t iterations = 0;
+    uint_fast32_t iterations = 0;
     do {
-        iterations += 1;
+        ++iterations;
 
         p_prev = p;
 
