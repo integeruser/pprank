@@ -39,6 +39,13 @@ Graph::Graph(const std::string& filename)
     // assume the node ids start from zero
     ++num_nodes;
 
+    for (uint_fast32_t node = 0; node < num_nodes; ++node) {
+        const bool isdangling = out_edges.count(node) == 0;
+        if (isdangling) {
+            dangling_nodes.insert(node);
+        }
+    }
+
     file.close();
 }
 
