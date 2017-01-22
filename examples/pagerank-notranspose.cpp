@@ -1,36 +1,22 @@
-#include <algorithm>
-#include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <map>
 #include <utility>
-#include <vector>
 
 #include "utils.hpp"
 
+#include "armadillo"
 #include "prettyprint.hpp"
 
 
-float dist(const std::vector<float>& a, const std::vector<float>& b)
-{
-    assert(a.size() == b.size());
-    const size_t n = a.size();
-
-    float d = 0.0f;
-    for (uint_fast32_t i = 0; i < n; ++i) {
-        d += std::pow(a[i]-b[i], 2);
-    }
-    return std::sqrt(d);
-}
-
-std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
     const uint_fast32_t n = graph.num_nodes;
 
-    std::vector<float> p(n), p_new(n, 1.0f/n);
+    arma::fvec p, p_new(n);
+    p_new.fill(1.0f/n);
 
     const float d = 0.85f;
 
@@ -40,34 +26,34 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
         ++iterations;
 
         p = p_new;
-        std::fill(p_new.begin(), p_new.end(), 0.0f);
+
+        float sum = 0.0f;
+        for (uint_fast32_t node: graph.dangling_nodes) {
+            sum += p[node];
+        }
+        sum *= 1.0f/n;
 
         // to avoid storing A in memory recompute its rows at every iteration
-        for (uint_fast32_t i = 0; i < n; ++i) {
-            const auto outdegree = graph.out_edges.count(i) > 0 ?
-                                   graph.out_edges.at(i).size() : 0;
-            if (outdegree == 0) {
-                // dangling node
-                for (uint_fast32_t j = 0; j < n; ++j) {
-                    p_new[j] += (1.0f/n) * p[i];
-                }
-            }
-            else {
-                for (uint_fast32_t j: graph.out_edges.at(i)) {
-                    p_new[j] += (1.0f/outdegree) * p[i];
+        p_new.fill(0.0f);
+        for (uint_fast32_t from_node = 0; from_node < graph.num_nodes; ++from_node) {
+            const uint_fast32_t outdegree = graph.out_edges.count(from_node) > 0 ?
+                                            graph.out_edges.at(from_node).size() : 0;
+            if (outdegree > 0) {
+                for (uint_fast32_t to_node: graph.out_edges.at(from_node)) {
+                    p_new[to_node] += (1.0f/outdegree) * p[from_node];
                 }
             }
         }
-        for (uint_fast32_t i = 0; i < n; ++i) {
-            p_new[i] = (1.0f-d)/n + d * p_new[i];
+        for (uint_fast32_t node = 0; node < n; ++node) {
+            p_new[node] = (1.0f-d)/n + d * (p_new[node]+sum);
         }
     }
-    while (dist(p, p_new) >= 1E-6f);
+    while (arma::norm(p_new-p, 1) >= 1E-6f);
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t i = 0; i < p.size(); ++i) {
-        ranks[i] = p[i];
+    for (uint_fast32_t node = 0; node < n; ++node) {
+        ranks[node] = p[node];
     }
     return std::make_pair(iterations, ranks);
 }
