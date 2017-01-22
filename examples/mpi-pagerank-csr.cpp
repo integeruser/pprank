@@ -16,7 +16,7 @@ int rank;
 int num_processes;
 
 
-std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
     const uint_fast32_t n = graph.num_nodes;
@@ -24,8 +24,8 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     const CSC A = CSC(graph);
     const CSR At = transpose(A);
 
-    arma::fvec p(n), p_prev;
-    p.fill(1.0f/n);
+    arma::fvec p, p_new(n), dangling(n);
+    p_new.fill(1.0f/n);
 
     const arma::fvec ones(n, arma::fill::ones);
     const float d = 0.85f;
@@ -47,7 +47,14 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     do {
         ++iterations;
 
-        p_prev = p;
+        p = p_new;
+
+        float sum = 0.0f;
+        for (uint_fast32_t node: graph.dangling_nodes) {
+            sum += p[node];
+        }
+        sum *= 1.0f/n;
+        dangling.fill(sum);
 
         // each process computes the matrix-vector product only for its block of rows
         const CSR At_block = blocks[rank].second;
@@ -58,16 +65,16 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
         MPI_Allgatherv(prod_block.memptr(), blocks_num_rows[rank], MPI_FLOAT,
                        prod.memptr(), blocks_num_rows.data(), blocks_displacements.data(), MPI_FLOAT, MPI_COMM_WORLD);
 
-        p = (1-d)/n * ones + d * (prod);
+        p_new = (1-d)/n * ones + d * (prod + dangling);
     }
-    while (arma::norm(p-p_prev) >= 1E-6f);
+    while (arma::norm(p_new-p, 1) >= 1E-6f);
 
     const double finish_time = MPI_Wtime();
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t i = 0; i < p.size(); ++i) {
-        ranks[i] = p[i];
+    for (uint_fast32_t node = 0; node < n; ++node) {
+        ranks[node] = p[node];
     }
     return std::make_pair(iterations, ranks);
 }
