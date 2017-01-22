@@ -10,36 +10,25 @@
 #include "prettyprint.hpp"
 
 
-arma::sp_fmat to_adjacency_mat(const Graph& graph)
-{
-    arma::sp_fmat adjmat(graph.num_nodes, graph.num_nodes);
-    for (uint_fast32_t i = 0; i < graph.num_nodes; ++i) {
-        const auto outdegree = graph.out_edges.count(i) > 0 ? graph.out_edges.at(i).size() : 0;
-        if (outdegree == 0) {
-            // dangling node
-            for (uint_fast32_t j = 0; j < graph.num_nodes; ++j) {
-                adjmat(i, j) = 1.0f/graph.num_nodes;
-            }
-        }
-        else {
-            for (uint_fast32_t j: graph.out_edges.at(i)) {
-                adjmat(i, j) = 1.0f/outdegree;
-            }
-        }
-    }
-    return adjmat;
-}
-
-std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 {
     // initialization
     const uint_fast32_t n = graph.num_nodes;
 
-    const arma::sp_fmat A = to_adjacency_mat(graph);
+    // build the adjacency matrix
+    arma::sp_fmat A(n, n);
+    for (uint_fast32_t from_node = 0; from_node < graph.num_nodes; ++from_node) {
+        const auto outdegree = graph.out_edges.count(from_node) > 0 ? graph.out_edges.at(from_node).size() : 0;
+        if (outdegree > 0) {
+            for (uint_fast32_t to_node: graph.out_edges.at(from_node)) {
+                A(from_node, to_node) = 1.0f/outdegree;
+            }
+        }
+    }
     const arma::sp_fmat At = A.t();
 
-    arma::fvec p(n), p_prev;
-    p.fill(1.0f/n);
+    arma::fvec p, p_new(n), dangling(n);
+    p_new.fill(1.0f/n);
 
     const arma::fvec ones(n, arma::fill::ones);
     const float d = 0.85f;
@@ -49,16 +38,22 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     do {
         ++iterations;
 
-        p_prev = p;
+        p = p_new;
 
-        p = (1-d)/n * ones + d * (At*p);
+        float sum = 0.0f;
+        for (auto node: graph.dangling_nodes) {
+            sum += p[node];
+        }
+        dangling.fill((1.0f/n)*sum);
+
+        p_new = (1-d)/n * ones + d * (At*p + dangling);
     }
-    while (arma::norm(p-p_prev) >= 1E-6f);
+    while (arma::norm(p_new-p, 1) >= 1E-6f);
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t i = 0; i < p.size(); ++i) {
-        ranks[i] = p[i];
+    for (uint_fast32_t node = 0; node < p.size(); ++node) {
+        ranks[node] = p[node];
     }
     return std::make_pair(iterations, ranks);
 }
