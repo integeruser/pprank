@@ -18,6 +18,11 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
     arma::fvec p, p_new(n);
     p_new.fill(1.0f/n);
 
+    arma::fvec dangling(n);
+    const arma::uvec dangling_nodes =
+        arma::conv_to<arma::uvec>::from(
+            std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend()));
+
     const float d = 0.85f;
 
     // ranks computation
@@ -27,11 +32,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
         p = p_new;
 
-        float sum = 0.0f;
-        for (uint_fast32_t node: graph.dangling_nodes) {
-            sum += p[node];
-        }
-        sum *= 1.0f/n;
+        const float dangling_nodes_contribution = 1.0f/n * arma::sum(p(dangling_nodes));
 
         // to avoid storing A in memory recompute its rows at every iteration
         p_new.fill(0.0f);
@@ -45,7 +46,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
             }
         }
         for (uint_fast32_t node = 0; node < n; ++node) {
-            p_new[node] = (1.0f-d)/n + d * (p_new[node]+sum);
+            p_new[node] = (1.0f-d)/n + d * (p_new[node]+dangling_nodes_contribution);
         }
     }
     while (arma::norm(p_new-p, 1) >= 1E-6f);

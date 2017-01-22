@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <vector>
 #include <utility>
 
 #include "utils.hpp"
@@ -18,8 +19,13 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
     const CSC A = CSC(graph);
     const CSR At = transpose(A);
 
-    arma::fvec p, p_new(n), dangling(n);
+    arma::fvec p, p_new(n);
     p_new.fill(1.0f/n);
+
+    arma::fvec dangling(n);
+    const arma::uvec dangling_nodes =
+        arma::conv_to<arma::uvec>::from(
+            std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend()));
 
     const arma::fvec ones(n, arma::fill::ones);
     const float d = 0.85f;
@@ -31,12 +37,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
         p = p_new;
 
-        float sum = 0.0f;
-        for (uint_fast32_t node: graph.dangling_nodes) {
-            sum += p[node];
-        }
-        sum *= 1.0f/n;
-        dangling.fill(sum);
+        dangling.fill(1.0f/n * arma::sum(p(dangling_nodes)));
 
         p_new = (1-d)/n * ones + d * (At*p + dangling);
     }
