@@ -18,7 +18,8 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
     // build the adjacency matrix
     arma::sp_fmat A(n, n);
     for (uint_fast32_t from_node = 0; from_node < graph.num_nodes; ++from_node) {
-        const auto outdegree = graph.out_edges.count(from_node) > 0 ? graph.out_edges.at(from_node).size() : 0;
+        const uint_fast32_t outdegree = graph.out_edges.count(from_node) > 0 ?
+                                        graph.out_edges.at(from_node).size() : 0;
         if (outdegree > 0) {
             for (uint_fast32_t to_node: graph.out_edges.at(from_node)) {
                 A(from_node, to_node) = 1.0f/outdegree;
@@ -41,10 +42,11 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
         p = p_new;
 
         float sum = 0.0f;
-        for (auto node: graph.dangling_nodes) {
+        for (uint_fast32_t node: graph.dangling_nodes) {
             sum += p[node];
         }
-        dangling.fill((1.0f/n)*sum);
+        sum *= 1.0f/n;
+        dangling.fill(sum);
 
         p_new = (1-d)/n * ones + d * (At*p + dangling);
     }
@@ -52,7 +54,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t node = 0; node < p.size(); ++node) {
+    for (uint_fast32_t node = 0; node < n; ++node) {
         ranks[node] = p[node];
     }
     return std::make_pair(iterations, ranks);
