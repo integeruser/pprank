@@ -72,6 +72,27 @@ CSC::CSC(const Graph& graph)
 }
 
 
+CSR::CSR(const arma::fmat& mat)
+{
+    num_rows = mat.n_rows;
+    num_cols = mat.n_cols;
+
+    uint_fast32_t num_nonzero_values = 0;
+    ia.push_back(num_nonzero_values);
+
+    for (uint_fast32_t from_node = 0; from_node < mat.n_rows; ++from_node) {
+        for (uint_fast32_t to_node = 0; to_node < mat.n_cols; ++to_node) {
+            const float value = mat(from_node, to_node);
+            if (value != 0.0f) {
+                a.push_back(value);
+                ja.push_back(to_node);
+                ++num_nonzero_values;
+            }
+        }
+        ia.push_back(num_nonzero_values);
+    }
+}
+
 arma::fvec CSR::operator*(const arma::fvec& vec) const
 {
     assert(num_cols == vec.size());

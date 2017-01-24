@@ -38,7 +38,7 @@ struct CSR {
     std::vector<uint_fast32_t> ja;
 
     CSR() {}
-    CSR(const Graph&);
+    CSR(const arma::fmat&);
 
     arma::fvec operator*(const arma::fvec&) const;
 
