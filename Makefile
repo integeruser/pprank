@@ -20,8 +20,14 @@ mpi-pagerank-csr:
 	-Iinclude -larmadillo
 
 
+tests:
+	$(CXX) -std=c++17 -O3 -Wall -o tests \
+	src/utils.cpp test/main.cpp \
+	-Iinclude -larmadillo
+
+
 all:
-	make pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr
+	make pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr tests
 
 clean:
-	rm -f pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr
+	rm -f pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr tests
