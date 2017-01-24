@@ -1,3 +1,9 @@
+pprank:
+	mpic++ -std=c++17 -O3 -Wall -o pprank \
+	src/main.cpp src/utils.cpp \
+	-Iinclude -larmadillo
+
+
 pagerank-notranspose:
 	$(CXX) -std=c++17 -O3 -Wall -o pagerank-notranspose \
 	src/utils.cpp examples/pagerank-notranspose.cpp \
@@ -14,12 +20,6 @@ pagerank-csr:
 	-Iinclude -larmadillo
 
 
-mpi-pagerank-csr:
-	mpic++ -std=c++17 -O3 -Wall -o mpi-pagerank-csr \
-	src/utils.cpp examples/mpi-pagerank-csr.cpp \
-	-Iinclude -larmadillo
-
-
 tests:
 	$(CXX) -std=c++17 -O3 -Wall -o tests \
 	src/utils.cpp test/main.cpp \
@@ -27,7 +27,7 @@ tests:
 
 
 all:
-	make pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr tests
+	make pprank pagerank-notranspose pagerank pagerank-csr tests
 
 clean:
-	rm -f pagerank-notranspose pagerank pagerank-csr mpi-pagerank-csr tests
+	rm -f pprank pagerank-notranspose pagerank pagerank-csr tests

@@ -1,6 +1,6 @@
 inputs/*
+pprank
 pagerank
 pagerank-notranspose
 pagerank-csr
-mpi-pagerank-csr
 tests
