@@ -3,6 +3,7 @@ indent-classes
 indent-switches
 break-closing-brackets
 add-brackets
+keep-one-line-blocks
 keep-one-line-statements
 close-templates
 max-code-length=120
