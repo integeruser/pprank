@@ -12,7 +12,7 @@
 #include "prettyprint.hpp"
 
 
-std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol=1E-6f)
 {
     // initialization
     const uint_fast32_t n = graph.num_nodes;
@@ -48,7 +48,7 @@ std::pair<size_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph)
 
         p_new = (1-d)/n * ones + d * (At*p + dangling);
     }
-    while (arma::norm(p_new-p, 1) >= 1E-6f);
+    while (arma::norm(p_new-p, 1) >= tol);
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
