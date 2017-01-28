@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -74,6 +75,11 @@ int main(int argc, char const *argv[])
     const auto iterations = results.first;
     const auto ranks = results.second;
     std::cout << "[*] Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
+
+    std::ofstream outfile;
+    outfile.open("ranks-" + std::to_string(graph.num_nodes) + ".txt");
+    outfile << ranks;
+    outfile.close();
 
     return EXIT_SUCCESS;
 }
