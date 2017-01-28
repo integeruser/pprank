@@ -12,7 +12,7 @@
 #include "prettyprint.hpp"
 
 
-std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol=1e-6f)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol)
 {
     // initialization
     const uint_fast32_t N = graph.num_nodes;
@@ -69,17 +69,22 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
 int main(int argc, char const *argv[])
 {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " filename" << std::endl;
+    if (!(argc == 2 || argc == 3)) {
+        std::cerr << "Usage: pagerank file [tol]" << std::endl;
         return EXIT_FAILURE;
     }
 
-    const auto filename = argv[1];
+    const char* file = argv[1];
+    float tol = 1e-6f;
+    if (argc == 3) {
+        tol = std::atof(argv[2]);
+    }
+
     std::cout << "[*] Building graph..." << std::endl;
-    const auto graph = Graph(filename);
+    const auto graph = Graph(file);
     std::cout << "        Nodes: " << graph.num_nodes << std::endl;
 
-    const auto results = pagerank(graph);
+    const auto results = pagerank(graph, tol);
     const auto iterations = results.first;
     const auto ranks = results.second;
     std::cout << "[*] Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
