@@ -21,24 +21,24 @@ int num_processes;
 std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol=1E-6f)
 {
     // initialization
-    const uint_fast32_t n = graph.num_nodes;
+    const uint_fast32_t N = graph.num_nodes;
 
     // build the adjacency matrix
     if (rank == MASTER) { std::cout << "[*] Building adjacency matrix..." << std::endl; }
     const CSC A = CSC(graph);
     const CSR At = transpose(A);
 
-    arma::fvec p, p_new(n);
-    p_new.fill(1.0f/n);
+    arma::fvec p, p_new(N);
+    p_new.fill(1.0f/N);
 
     // find dangling nodes
     if (rank == MASTER) { std::cout << "[*] Finding dangling nodes..." << std::endl; }
-    arma::fvec dangling(n);
+    arma::fvec dangling(N);
     const arma::uvec dangling_nodes =
         arma::conv_to<arma::uvec>::from(
             std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend()));
 
-    const arma::fvec ones(n, arma::fill::ones);
+    const arma::fvec ones(N, arma::fill::ones);
     const float d = 0.85f;
 
     // partition At in blocks of rows
@@ -63,18 +63,18 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
         p = p_new;
 
-        dangling.fill(1.0f/n * arma::sum(p(dangling_nodes)));
+        dangling.fill(1.0f/N * arma::sum(p(dangling_nodes)));
 
         // each process computes the matrix-vector product only for its block of rows
         const CSR At_block = blocks[rank].second;
         const arma::fvec prod_block = At_block * p;
 
         // gather the results of the matrix-vector products
-        arma::fvec prod(n);
+        arma::fvec prod(N);
         MPI_Allgatherv(prod_block.memptr(), blocks_num_rows[rank], MPI_FLOAT,
                        prod.memptr(), blocks_num_rows.data(), blocks_displacements.data(), MPI_FLOAT, MPI_COMM_WORLD);
 
-        p_new = (1-d)/n * ones + d * (prod + dangling);
+        p_new = (1-d)/N * ones + d * (prod + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
 
@@ -82,7 +82,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t node = 0; node < n; ++node) {
+    for (uint_fast32_t node = 0; node < N; ++node) {
         ranks[node] = p[node];
     }
     return std::make_pair(iterations, ranks);

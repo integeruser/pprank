@@ -15,11 +15,11 @@
 std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol=1E-6f)
 {
     // initialization
-    const uint_fast32_t n = graph.num_nodes;
+    const uint_fast32_t N = graph.num_nodes;
 
     // build the adjacency matrix
     std::cout << "[*] Building adjacency matrix..." << std::endl;
-    arma::sp_fmat A(n, n);
+    arma::sp_fmat A(N, N);
     for (uint_fast32_t from_node = 0; from_node < graph.num_nodes; ++from_node) {
         const uint_fast32_t outdegree = graph.out_edges.count(from_node) > 0 ?
                                         graph.out_edges.at(from_node).size() : 0;
@@ -31,17 +31,17 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
     }
     const arma::sp_fmat At = A.t();
 
-    arma::fvec p, p_new(n);
-    p_new.fill(1.0f/n);
+    arma::fvec p, p_new(N);
+    p_new.fill(1.0f/N);
 
     // find dangling nodes
     std::cout << "[*] Finding dangling nodes..." << std::endl;
-    arma::fvec dangling(n);
+    arma::fvec dangling(N);
     const arma::uvec dangling_nodes =
         arma::conv_to<arma::uvec>::from(
             std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend()));
 
-    const arma::fvec ones(n, arma::fill::ones);
+    const arma::fvec ones(N, arma::fill::ones);
     const float d = 0.85f;
 
     // ranks computation
@@ -53,15 +53,15 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
         p = p_new;
 
-        dangling.fill(1.0f/n * arma::sum(p(dangling_nodes)));
+        dangling.fill(1.0f/N * arma::sum(p(dangling_nodes)));
 
-        p_new = (1-d)/n * ones + d * (At*p + dangling);
+        p_new = (1-d)/N * ones + d * (At*p + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t node = 0; node < n; ++node) {
+    for (uint_fast32_t node = 0; node < N; ++node) {
         ranks[node] = p[node];
     }
     return std::make_pair(iterations, ranks);
