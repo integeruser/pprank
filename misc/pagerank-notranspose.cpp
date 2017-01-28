@@ -30,10 +30,9 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // ranks computation
     uint_fast32_t iterations = 0;
-    std::cout << "[*] Starting PageRank..." << std::endl;
+    std::cout << "[*] Computing PageRank with tol=" << tol << "..." << std::endl;
     do {
         ++iterations;
-        std::cout << "        Iteration #" << iterations << "..." << std::endl;
 
         p = p_new;
 

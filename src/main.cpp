@@ -56,10 +56,9 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // ranks computation
     uint_fast32_t iterations = 0;
-    if (rank == MASTER) { std::cout << "[*] Starting PageRank..." << std::endl; }
+    if (rank == MASTER) { std::cout << "[*] Computing PageRank with tol=" << tol << "..." << std::endl; }
     do {
         ++iterations;
-        if (rank == MASTER) { std::cout << "        Iteration #" << iterations << "..." << std::endl; }
 
         p = p_new;
 
