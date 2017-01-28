@@ -6,17 +6,17 @@ pprank:
 
 pagerank-notranspose:
 	$(CXX) -std=c++17 -O3 -Wall -o pagerank-notranspose \
-	src/utils.cpp examples/pagerank-notranspose.cpp \
+	src/utils.cpp misc/pagerank-notranspose.cpp \
 	-Iinclude
 
 pagerank:
 	$(CXX) -std=c++17 -O3 -Wall -o pagerank \
-	src/utils.cpp examples/pagerank.cpp \
+	src/utils.cpp misc/pagerank.cpp \
 	-Iinclude -larmadillo
 
 pagerank-csr:
 	$(CXX) -std=c++17 -O3 -Wall -o pagerank-csr \
-	src/utils.cpp examples/pagerank-csr.cpp \
+	src/utils.cpp misc/pagerank-csr.cpp \
 	-Iinclude -larmadillo
 
 
