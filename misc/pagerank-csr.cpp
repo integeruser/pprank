@@ -12,7 +12,7 @@
 #include "prettyprint.hpp"
 
 
-std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol=1E-6f)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol=1e-6f)
 {
     // initialization
     const uint_fast32_t N = graph.num_nodes;
@@ -37,7 +37,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // ranks computation
     uint_fast32_t iterations = 0;
-    std::cout << "[*] Computing PageRank with tol=" << tol << "..." << std::endl;
+    std::cout << "[*] Computing PageRank (tol=" << tol << ")..." << std::endl;
     do {
         ++iterations;
 
