@@ -18,6 +18,8 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
     arma::fvec p, p_new(n);
     p_new.fill(1.0f/n);
 
+    // find dangling nodes
+    std::cout << "[*] Finding dangling nodes..." << std::endl;
     arma::fvec dangling(n);
     const arma::uvec dangling_nodes =
         arma::conv_to<arma::uvec>::from(
@@ -27,8 +29,10 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // ranks computation
     uint_fast32_t iterations = 0;
+    std::cout << "[*] Starting PageRank..." << std::endl;
     do {
         ++iterations;
+        std::cout << "        Iteration #" << iterations << "..." << std::endl;
 
         p = p_new;
 
@@ -68,13 +72,14 @@ int main(int argc, char const *argv[])
     }
 
     const auto filename = argv[1];
+    std::cout << "[*] Building graph..." << std::endl;
     const auto graph = Graph(filename);
-    std::cout << "Nodes: " << graph.num_nodes << std::endl;
+    std::cout << "        Nodes: " << graph.num_nodes << std::endl;
 
     const auto results = pagerank(graph);
     const auto iterations = results.first;
     const auto ranks = results.second;
-    std::cout << "Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
+    std::cout << "[*] Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
 
     return EXIT_SUCCESS;
 }

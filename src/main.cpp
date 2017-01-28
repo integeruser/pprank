@@ -22,12 +22,16 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
     // initialization
     const uint_fast32_t n = graph.num_nodes;
 
+    // build the adjacency matrix
+    if (rank == MASTER) { std::cout << "[*] Building adjacency matrix..." << std::endl; }
     const CSC A = CSC(graph);
     const CSR At = transpose(A);
 
     arma::fvec p, p_new(n);
     p_new.fill(1.0f/n);
 
+    // find dangling nodes
+    if (rank == MASTER) { std::cout << "[*] Finding dangling nodes..." << std::endl; }
     arma::fvec dangling(n);
     const arma::uvec dangling_nodes =
         arma::conv_to<arma::uvec>::from(
@@ -37,6 +41,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
     const float d = 0.85f;
 
     // partition At in blocks of rows
+    if (rank == MASTER) { std::cout << "[*] Splitting matrix in blocks..." << std::endl; }
     const auto blocks = At.split(num_processes);
 
     std::vector<int> blocks_displacements, blocks_num_rows;
@@ -50,8 +55,10 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
     // ranks computation
     uint_fast32_t iterations = 0;
+    if (rank == MASTER) { std::cout << "[*] Starting PageRank..." << std::endl; }
     do {
         ++iterations;
+        if (rank == MASTER) { std::cout << "        Iteration #" << iterations << "..." << std::endl; }
 
         p = p_new;
 
@@ -89,24 +96,19 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
     if (argc != 2) {
-        if (rank == MASTER) {
-            std::cerr << "Usage: " << argv[0] << " filename" << std::endl;
-        }
+        if (rank == MASTER) { std::cerr << "Usage: " << argv[0] << " filename" << std::endl; }
         return EXIT_FAILURE;
     }
 
     const auto filename = argv[1];
+    if (rank == MASTER) { std::cout << "[*] Building graph..." << std::endl; }
     const auto graph = Graph(filename);
-    if (rank == MASTER) {
-        std::cout << "Nodes: " << graph.num_nodes << std::endl;
-    }
+    if (rank == MASTER) { std::cout << "        Nodes: " << graph.num_nodes << std::endl; }
 
     const auto results = pagerank(graph);
-    if (rank == MASTER) {
-        const auto iterations = results.first;
-        const auto ranks = results.second;
-        std::cout << "Ranks: " << ranks << " in " << iterations << " iterations " << std::endl;
-    }
+    const auto iterations = results.first;
+    const auto ranks = results.second;
+    if (rank == MASTER) { std::cout << "[*] Ranks: " << ranks << " in " << iterations << " iterations " << std::endl; }
 
     MPI_Finalize();
 
