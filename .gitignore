@@ -1,6 +1,5 @@
 inputs/*
 pprank
-pagerank
-pagerank-notranspose
-pagerank-csr
+sequential
+notranspose
 tests

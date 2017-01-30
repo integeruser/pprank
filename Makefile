@@ -4,20 +4,15 @@ pprank:
 	-Iinclude -larmadillo
 
 
-pagerank-notranspose:
-	$(CXX) -std=c++17 -O3 -Wall -o pagerank-notranspose \
-	src/utils.cpp misc/pagerank-notranspose.cpp \
+sequential:
+	$(CXX) -std=c++17 -O3 -Wall -o sequential \
+	src/utils.cpp misc/sequential.cpp \
+	-Iinclude -larmadillo
+
+notranspose:
+	$(CXX) -std=c++17 -O3 -Wall -o notranspose \
+	src/utils.cpp misc/notranspose.cpp \
 	-Iinclude
-
-pagerank:
-	$(CXX) -std=c++17 -O3 -Wall -o pagerank \
-	src/utils.cpp misc/pagerank.cpp \
-	-Iinclude -larmadillo
-
-pagerank-csr:
-	$(CXX) -std=c++17 -O3 -Wall -o pagerank-csr \
-	src/utils.cpp misc/pagerank-csr.cpp \
-	-Iinclude -larmadillo
 
 
 tests:
@@ -27,7 +22,7 @@ tests:
 
 
 all:
-	make pprank pagerank-notranspose pagerank pagerank-csr tests
+	make pprank sequential notranspose tests
 
 clean:
-	rm -f pprank pagerank-notranspose pagerank pagerank-csr tests
+	rm -f pprank sequential notranspose tests
