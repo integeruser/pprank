@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <cstdlib>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -121,13 +120,6 @@ int main(int argc, char *argv[])
             const float rank = pair.second;
             std::cout << "        " << std::setfill('0') << std::setw(9) << node << ": " << rank << std::endl;
         }
-    }
-
-    if (rank == MASTER) {
-        std::ofstream outfile;
-        outfile.open("ranks-" + std::to_string(graph.num_nodes) + ".txt");
-        outfile << ranks;
-        outfile.close();
     }
 
     MPI_Finalize();
