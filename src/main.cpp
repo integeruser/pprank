@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -113,7 +114,14 @@ int main(int argc, char *argv[])
     const auto results = pagerank(graph, tol);
     const auto iterations = results.first;
     const auto ranks = results.second;
-    if (rank == MASTER) { std::cout << "[*] Ranks: " << ranks << " in " << iterations << " iterations " << std::endl; }
+    if (rank == MASTER) {
+        std::cout << "[*] Ranks (after " << iterations << " iterations):" << std::endl;
+        for (const auto pair: ranks) {
+            const uint_fast32_t node = pair.first;
+            const float rank = pair.second;
+            std::cout << "        " << std::setfill('0') << std::setw(9) << node << ": " << rank << std::endl;
+        }
+    }
 
     if (rank == MASTER) {
         std::ofstream outfile;
