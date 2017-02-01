@@ -62,7 +62,8 @@ CSC::CSC(const Graph& graph)
                                        graph.in_edges.at(to_node).size() : 0;
         if (indegree > 0) {
             for (uint_fast32_t from_node: graph.in_edges.at(to_node)) {
-                a.push_back(1.0f/indegree);
+                const uint_fast32_t outdegree = graph.out_edges.at(from_node).size();
+                a.push_back(1.0f/outdegree);
                 ja.push_back(from_node);
             }
             num_nonzero_values += indegree;
