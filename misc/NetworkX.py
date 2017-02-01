@@ -18,5 +18,5 @@ if __name__ == '__main__':
     ranks = nx.pagerank(graph, tol=args.tol)
 
     print('[*] Ranks:')
-    for node, rank in ranks.items():
+    for node, rank in sorted(ranks.items()):
         print('        %0.9d: %g' % (node, rank))
