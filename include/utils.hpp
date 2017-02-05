@@ -2,8 +2,6 @@
 #define UTILS_HPP
 
 #include <cstdint>
-#include <fstream>
-#include <iostream>
 #include <map>
 #include <set>
 #include <string>
@@ -32,9 +30,9 @@ struct CSC {
 
     CSC() {}
     CSC(const Graph&);
-    CSC(std::ifstream&);
+    CSC(const std::string&);
 
-    void to_file(std::ofstream&) const;
+    void to_file() const;
 };
 
 struct CSR {

@@ -73,8 +73,10 @@ CSC::CSC(const Graph& graph)
     }
 }
 
-CSC::CSC(std::ifstream& infile)
+CSC::CSC(const std::string& filename)
 {
+    std::ifstream infile(filename, std::ios::in|std::ios::binary);
+
     infile.read(reinterpret_cast<char *>(&num_rows), sizeof(uint_fast32_t));
     infile.read(reinterpret_cast<char *>(&num_cols), sizeof(uint_fast32_t));
 
@@ -98,10 +100,15 @@ CSC::CSC(std::ifstream& infile)
     infile.read(reinterpret_cast<char *>(ia.data()), sizeof(uint_fast32_t)*ia_size);
     infile.read(reinterpret_cast<char *>(ja.data()), sizeof(uint_fast32_t)*ja_size);
     infile.read(reinterpret_cast<char *>(dangling_nodes.data()), sizeof(uint_fast32_t)*dangling_nodes_size);
+
+    infile.close();
 }
 
-void CSC::to_file(std::ofstream& outfile) const
+void CSC::to_file() const
 {
+    std::ofstream outfile;
+    outfile.open("csc-" + std::to_string(num_rows) + "-" + std::to_string(num_cols), std::ios::out|std::ios::binary);
+
     outfile.write(reinterpret_cast<const char *>(&num_rows), sizeof(uint_fast32_t));
     outfile.write(reinterpret_cast<const char *>(&num_cols), sizeof(uint_fast32_t));
 
@@ -121,6 +128,8 @@ void CSC::to_file(std::ofstream& outfile) const
     outfile.write(reinterpret_cast<const char *>(ia.data()), sizeof(uint_fast32_t)*ia_size);
     outfile.write(reinterpret_cast<const char *>(ja.data()), sizeof(uint_fast32_t)*ja_size);
     outfile.write(reinterpret_cast<const char *>(dangling_nodes.data()), sizeof(uint_fast32_t)*dangling_nodes_size);
+
+    outfile.close();
 }
 
 

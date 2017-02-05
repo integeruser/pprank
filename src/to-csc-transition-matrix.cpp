@@ -26,10 +26,7 @@ int main(int argc, char const *argv[])
     std::cout << "        Danglings: " << csc.dangling_nodes.size() << std::endl;
 
     std::cout << "[*] Writing CSC transition matrix to file..." << std::endl;
-    std::ofstream outfile;
-    outfile.open("csc-" + std::to_string(graph.num_nodes), std::ios::out|std::ios::binary);
-    csc.to_file(outfile);
-    outfile.close();
+    csc.to_file();
 
     return EXIT_SUCCESS;
 }

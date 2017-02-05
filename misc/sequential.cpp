@@ -56,15 +56,13 @@ int main(int argc, char const *argv[])
         return EXIT_FAILURE;
     }
 
-    const char* file = argv[1];
+    const char* filename = argv[1];
     float tol = 1e-6f;
     if (argc == 3) {
         tol = std::atof(argv[2]);
     }
 
-    std::ifstream infile(file, std::ios::in);
-    const CSC csc = CSC(infile);
-    infile.close();
+    const CSC csc = CSC(filename);
 
     const auto results = pagerank(csc, tol);
     const auto iterations = results.first;
