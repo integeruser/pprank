@@ -19,6 +19,7 @@ Graph::Graph(const std::string& filename)
 {
     // assume the file contains two integers per line, separated by a whitespace
     // each line represent an edge from a source node to a destination node
+    // checks for duplicate edges are NOT performed
     std::ifstream file(filename, std::ios::in);
 
     num_nodes = 0;
@@ -32,7 +33,7 @@ Graph::Graph(const std::string& filename)
         }
 
         in_edges[to_node].insert(from_node);
-        out_edges[from_node].insert(to_node);
+        ++outdegrees[from_node];
 
         num_nodes = std::max(std::max(from_node, to_node), num_nodes);
     }
@@ -40,7 +41,7 @@ Graph::Graph(const std::string& filename)
     ++num_nodes;
 
     for (uint_fast32_t node = 0; node < num_nodes; ++node) {
-        const bool isdangling = out_edges.count(node) == 0;
+        const bool isdangling = outdegrees.count(node) == 0;
         if (isdangling) {
             dangling_nodes.insert(node);
         }
@@ -63,8 +64,7 @@ CSC::CSC(const Graph& graph)
                                        graph.in_edges.at(to_node).size() : 0;
         if (indegree > 0) {
             for (uint_fast32_t from_node: graph.in_edges.at(to_node)) {
-                const uint_fast32_t outdegree = graph.out_edges.at(from_node).size();
-                a.push_back(1.0f/outdegree);
+                a.push_back(1.0f/graph.outdegrees.at(from_node));
                 ja.push_back(from_node);
             }
             num_nonzero_values += indegree;

@@ -16,7 +16,7 @@
 struct Graph {
     uint_fast32_t num_nodes;
     std::map<uint_fast32_t, std::set<uint_fast32_t>> in_edges;
-    std::map<uint_fast32_t, std::set<uint_fast32_t>> out_edges;
+    std::map<uint_fast32_t, uint_fast32_t> outdegrees;
     std::set<uint_fast32_t> dangling_nodes;
 
     Graph(const std::string&);
