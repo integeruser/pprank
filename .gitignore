@@ -1,5 +1,8 @@
 inputs/*
+to-csc-transition-matrix
 pprank
 sequential
 notranspose
 tests
+csc*
+ranks*

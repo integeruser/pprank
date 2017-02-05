@@ -2,6 +2,8 @@
 #define UTILS_HPP
 
 #include <cstdint>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <set>
 #include <string>
@@ -26,9 +28,13 @@ struct CSC {
     std::vector<float> a;
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
+    std::vector<uint_fast32_t> dangling_nodes;
 
     CSC() {}
     CSC(const Graph&);
+    CSC(std::ifstream&);
+
+    void to_file(std::ofstream&) const;
 };
 
 struct CSR {
@@ -36,6 +42,7 @@ struct CSR {
     std::vector<float> a;
     std::vector<uint_fast32_t> ia;
     std::vector<uint_fast32_t> ja;
+    std::vector<uint_fast32_t> dangling_nodes;
 
     CSR() {}
     CSR(const arma::fmat&);

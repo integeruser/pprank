@@ -53,6 +53,7 @@ Graph::Graph(const std::string& filename)
 CSC::CSC(const Graph& graph)
 {
     num_rows = num_cols = graph.num_nodes;
+    dangling_nodes = std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend());
 
     uint_fast32_t num_nonzero_values = 0;
     ia.push_back(num_nonzero_values);
@@ -70,6 +71,56 @@ CSC::CSC(const Graph& graph)
         }
         ia.push_back(num_nonzero_values);
     }
+}
+
+CSC::CSC(std::ifstream& infile)
+{
+    infile.read(reinterpret_cast<char *>(&num_rows), sizeof(uint_fast32_t));
+    infile.read(reinterpret_cast<char *>(&num_cols), sizeof(uint_fast32_t));
+
+    uint_fast32_t a_size;
+    infile.read(reinterpret_cast<char *>(&a_size), sizeof(uint_fast32_t));
+    a.resize(a_size);
+
+    uint_fast32_t ia_size;
+    infile.read(reinterpret_cast<char *>(&ia_size), sizeof(uint_fast32_t));
+    ia.resize(ia_size);
+
+    uint_fast32_t ja_size;
+    infile.read(reinterpret_cast<char *>(&ja_size), sizeof(uint_fast32_t));
+    ja.resize(ja_size);
+
+    uint_fast32_t dangling_nodes_size;
+    infile.read(reinterpret_cast<char *>(&dangling_nodes_size), sizeof(uint_fast32_t));
+    dangling_nodes.resize(dangling_nodes_size);
+
+    infile.read(reinterpret_cast<char *>(a.data()), sizeof(float)*a_size);
+    infile.read(reinterpret_cast<char *>(ia.data()), sizeof(uint_fast32_t)*ia_size);
+    infile.read(reinterpret_cast<char *>(ja.data()), sizeof(uint_fast32_t)*ja_size);
+    infile.read(reinterpret_cast<char *>(dangling_nodes.data()), sizeof(uint_fast32_t)*dangling_nodes_size);
+}
+
+void CSC::to_file(std::ofstream& outfile) const
+{
+    outfile.write(reinterpret_cast<const char *>(&num_rows), sizeof(uint_fast32_t));
+    outfile.write(reinterpret_cast<const char *>(&num_cols), sizeof(uint_fast32_t));
+
+    const uint_fast32_t a_size = a.size();
+    outfile.write(reinterpret_cast<const char *>(&a_size), sizeof(uint_fast32_t));
+
+    const uint_fast32_t ia_size = ia.size();
+    outfile.write(reinterpret_cast<const char *>(&ia_size), sizeof(uint_fast32_t));
+
+    const uint_fast32_t ja_size = ja.size();
+    outfile.write(reinterpret_cast<const char *>(&ja_size), sizeof(uint_fast32_t));
+
+    const uint_fast32_t dangling_nodes_size = dangling_nodes.size();
+    outfile.write(reinterpret_cast<const char *>(&dangling_nodes_size), sizeof(uint_fast32_t));
+
+    outfile.write(reinterpret_cast<const char *>(a.data()), sizeof(float)*a_size);
+    outfile.write(reinterpret_cast<const char *>(ia.data()), sizeof(uint_fast32_t)*ia_size);
+    outfile.write(reinterpret_cast<const char *>(ja.data()), sizeof(uint_fast32_t)*ja_size);
+    outfile.write(reinterpret_cast<const char *>(dangling_nodes.data()), sizeof(uint_fast32_t)*dangling_nodes_size);
 }
 
 
@@ -159,5 +210,6 @@ CSR transpose(const CSC& csc)
     csr.a = csc.a;
     csr.ia = csc.ia;
     csr.ja = csc.ja;
+    csr.dangling_nodes = csc.dangling_nodes;
     return csr;
 }

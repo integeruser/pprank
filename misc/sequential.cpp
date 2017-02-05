@@ -12,25 +12,17 @@
 #include "prettyprint.hpp"
 
 
-std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& graph, const float tol)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const CSC& A, const float tol)
 {
     // initialization
-    const uint_fast32_t N = graph.num_nodes;
+    const uint_fast32_t N = A.num_rows;
 
-    // build the adjacency matrix
-    std::cout << "[*] Building adjacency matrix..." << std::endl;
-    const CSC A = CSC(graph);
     const CSR At = transpose(A);
 
     arma::fvec p, p_new(N);
     p_new.fill(1.0f/N);
 
-    // find dangling nodes
-    std::cout << "[*] Finding dangling nodes..." << std::endl;
-    arma::fvec dangling(N);
-    const arma::uvec dangling_nodes =
-        arma::conv_to<arma::uvec>::from(
-            std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend()));
+    const arma::uvec dangling_nodes = arma::conv_to<arma::uvec>::from(At.dangling_nodes);
 
     const arma::fvec ones(N, arma::fill::ones);
     const float d = 0.85f;
@@ -43,8 +35,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 
         p = p_new;
 
-        dangling.fill(1.0f/N * arma::sum(p(dangling_nodes)));
-
+        const arma::fvec dangling = 1.0f/N * arma::sum(p(dangling_nodes)) * ones;
         p_new = (1-d)/N * ones + d * (At*p + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
@@ -61,7 +52,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const Graph& g
 int main(int argc, char const *argv[])
 {
     if (!(argc == 2 || argc == 3)) {
-        std::cerr << "Usage: pagerank-csr file [tol]" << std::endl;
+        std::cerr << "Usage: sequential file [tol]" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -71,11 +62,11 @@ int main(int argc, char const *argv[])
         tol = std::atof(argv[2]);
     }
 
-    std::cout << "[*] Building graph..." << std::endl;
-    const auto graph = Graph(file);
-    std::cout << "        Nodes: " << graph.num_nodes << std::endl;
+    std::ifstream infile(file, std::ios::in);
+    const CSC csc = CSC(infile);
+    infile.close();
 
-    const auto results = pagerank(graph, tol);
+    const auto results = pagerank(csc, tol);
     const auto iterations = results.first;
     const auto ranks = results.second;
     std::cout << "[*] Ranks (after " << iterations << " iterations):" << std::endl;
