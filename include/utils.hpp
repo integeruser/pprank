@@ -13,27 +13,12 @@
 
 struct Graph {
     uint_fast32_t num_nodes;
-    std::map<uint_fast32_t, std::set<uint_fast32_t>> in_edges;
-    std::map<uint_fast32_t, uint_fast32_t> outdegrees;
+    std::map<uint_fast32_t, std::set<uint_fast32_t>> outedges;
     std::set<uint_fast32_t> dangling_nodes;
 
     Graph(const std::string&);
 };
 
-
-struct CSC {
-    uint_fast32_t num_rows, num_cols;
-    std::vector<float> a;
-    std::vector<uint_fast32_t> ia;
-    std::vector<uint_fast32_t> ja;
-    std::vector<uint_fast32_t> dangling_nodes;
-
-    CSC() {}
-    CSC(const Graph&);
-    CSC(const std::string&);
-
-    void to_file() const;
-};
 
 struct CSR {
     uint_fast32_t num_rows, num_cols;
@@ -42,15 +27,14 @@ struct CSR {
     std::vector<uint_fast32_t> ja;
     std::vector<uint_fast32_t> dangling_nodes;
 
-    CSR() {}
-    CSR(const arma::fmat&);
+    CSR();
+    CSR(const Graph&);
+    CSR(const std::string&);
 
-    arma::fvec operator*(const arma::fvec&) const;
+    arma::fvec dot_transposed(const arma::fvec&) const;
 
     std::vector<std::pair<uint_fast32_t, CSR>> split(uint_fast32_t) const;
 };
-
-CSR transpose(const CSC&);
 
 
 #endif

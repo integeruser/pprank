@@ -1,9 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <fstream>
 #include <iostream>
-#include <map>
 #include <set>
 #include <sstream>
 #include <string>
@@ -32,8 +30,7 @@ Graph::Graph(const std::string& filename)
             continue;
         }
 
-        in_edges[to_node].insert(from_node);
-        ++outdegrees[from_node];
+        outedges[from_node].insert(to_node);
 
         num_nodes = std::max(std::max(from_node, to_node), num_nodes);
     }
@@ -41,7 +38,9 @@ Graph::Graph(const std::string& filename)
     ++num_nodes;
 
     for (uint_fast32_t node = 0; node < num_nodes; ++node) {
-        const bool isdangling = outdegrees.count(node) == 0;
+        const uint_fast32_t outdegree = outedges.count(node) > 0 ?
+                                        outedges.at(node).size() : 0;
+        const bool isdangling = outdegree == 0;
         if (isdangling) {
             dangling_nodes.insert(node);
         }
@@ -51,7 +50,11 @@ Graph::Graph(const std::string& filename)
 }
 
 
-CSC::CSC(const Graph& graph)
+CSR::CSR()
+{
+}
+
+CSR::CSR(const Graph& graph)
 {
     num_rows = num_cols = graph.num_nodes;
     dangling_nodes = std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend());
@@ -59,109 +62,106 @@ CSC::CSC(const Graph& graph)
     uint_fast32_t num_nonzero_values = 0;
     ia.push_back(num_nonzero_values);
 
-    for (uint_fast32_t to_node = 0; to_node < graph.num_nodes; ++to_node) {
-        const uint_fast32_t indegree = graph.in_edges.count(to_node) > 0 ?
-                                       graph.in_edges.at(to_node).size() : 0;
-        if (indegree > 0) {
-            for (uint_fast32_t from_node: graph.in_edges.at(to_node)) {
-                a.push_back(1.0f/graph.outdegrees.at(from_node));
-                ja.push_back(from_node);
-            }
-            num_nonzero_values += indegree;
-        }
-        ia.push_back(num_nonzero_values);
-    }
-}
-
-CSC::CSC(const std::string& filename)
-{
-    std::ifstream infile(filename, std::ios::in|std::ios::binary);
-
-    infile.read(reinterpret_cast<char *>(&num_rows), sizeof(uint_fast32_t));
-    infile.read(reinterpret_cast<char *>(&num_cols), sizeof(uint_fast32_t));
-
-    uint_fast32_t a_size;
-    infile.read(reinterpret_cast<char *>(&a_size), sizeof(uint_fast32_t));
-    a.resize(a_size);
-
-    uint_fast32_t ia_size;
-    infile.read(reinterpret_cast<char *>(&ia_size), sizeof(uint_fast32_t));
-    ia.resize(ia_size);
-
-    uint_fast32_t ja_size;
-    infile.read(reinterpret_cast<char *>(&ja_size), sizeof(uint_fast32_t));
-    ja.resize(ja_size);
-
-    uint_fast32_t dangling_nodes_size;
-    infile.read(reinterpret_cast<char *>(&dangling_nodes_size), sizeof(uint_fast32_t));
-    dangling_nodes.resize(dangling_nodes_size);
-
-    infile.read(reinterpret_cast<char *>(a.data()), sizeof(float)*a_size);
-    infile.read(reinterpret_cast<char *>(ia.data()), sizeof(uint_fast32_t)*ia_size);
-    infile.read(reinterpret_cast<char *>(ja.data()), sizeof(uint_fast32_t)*ja_size);
-    infile.read(reinterpret_cast<char *>(dangling_nodes.data()), sizeof(uint_fast32_t)*dangling_nodes_size);
-
-    infile.close();
-}
-
-void CSC::to_file() const
-{
-    std::ofstream outfile;
-    outfile.open("csc-" + std::to_string(num_rows) + "-" + std::to_string(num_cols), std::ios::out|std::ios::binary);
-
-    outfile.write(reinterpret_cast<const char *>(&num_rows), sizeof(uint_fast32_t));
-    outfile.write(reinterpret_cast<const char *>(&num_cols), sizeof(uint_fast32_t));
-
-    const uint_fast32_t a_size = a.size();
-    outfile.write(reinterpret_cast<const char *>(&a_size), sizeof(uint_fast32_t));
-
-    const uint_fast32_t ia_size = ia.size();
-    outfile.write(reinterpret_cast<const char *>(&ia_size), sizeof(uint_fast32_t));
-
-    const uint_fast32_t ja_size = ja.size();
-    outfile.write(reinterpret_cast<const char *>(&ja_size), sizeof(uint_fast32_t));
-
-    const uint_fast32_t dangling_nodes_size = dangling_nodes.size();
-    outfile.write(reinterpret_cast<const char *>(&dangling_nodes_size), sizeof(uint_fast32_t));
-
-    outfile.write(reinterpret_cast<const char *>(a.data()), sizeof(float)*a_size);
-    outfile.write(reinterpret_cast<const char *>(ia.data()), sizeof(uint_fast32_t)*ia_size);
-    outfile.write(reinterpret_cast<const char *>(ja.data()), sizeof(uint_fast32_t)*ja_size);
-    outfile.write(reinterpret_cast<const char *>(dangling_nodes.data()), sizeof(uint_fast32_t)*dangling_nodes_size);
-
-    outfile.close();
-}
-
-
-CSR::CSR(const arma::fmat& mat)
-{
-    num_rows = mat.n_rows;
-    num_cols = mat.n_cols;
-
-    uint_fast32_t num_nonzero_values = 0;
-    ia.push_back(num_nonzero_values);
-
-    for (uint_fast32_t from_node = 0; from_node < mat.n_rows; ++from_node) {
-        for (uint_fast32_t to_node = 0; to_node < mat.n_cols; ++to_node) {
-            const float value = mat(from_node, to_node);
-            if (value != 0.0f) {
-                a.push_back(value);
+    for (uint_fast32_t from_node = 0; from_node < graph.num_nodes; ++from_node) {
+        const uint_fast32_t outdegree = graph.outedges.count(from_node) > 0 ?
+                                        graph.outedges.at(from_node).size() : 0;
+        if (outdegree > 0) {
+            for (uint_fast32_t to_node: graph.outedges.at(from_node)) {
+                a.push_back(1.0f/outdegree);
                 ja.push_back(to_node);
-                ++num_nonzero_values;
             }
+            num_nonzero_values += outdegree;
         }
         ia.push_back(num_nonzero_values);
     }
 }
 
-arma::fvec CSR::operator*(const arma::fvec& vec) const
+CSR::CSR(const std::string& filename)
 {
-    assert(num_cols == vec.size());
+    // std::ifstream file(filename, std::ios::in);
 
+    // uint_fast32_t num_nodes = 281903;
+    // uint_fast32_t num_edges = 2312497;
+
+    // uint_fast32_t num_nonzero_values = 0;
+    // ia.push_back(num_nonzero_values);
+
+    // uint_fast32_t curr_node = 0;
+    // std::set<uint_fast32_t> curr_outedges = std::set<uint_fast32_t>();
+
+    // std::string line;
+    // while (std::getline(file, line)) {
+    //     std::istringstream iss(line);
+    //     uint_fast32_t from_node, to_node;
+    //     if (!(iss >> from_node >> to_node)) {
+    //         // skip malformed lines
+    //         std::cout << "malformed " << line << std::endl;
+    //         continue;
+    //     }
+
+    //     if (from_node == curr_node) {
+    //         curr_outedges.insert(to_node);
+    //     }
+    //     else {
+    //         const uint_fast32_t curr_isdangling = curr_outedges.size() == 0;
+    //         if (curr_isdangling) {
+    //             dangling_nodes.push_back(curr_node);
+    //         }
+    //         else {
+    //             for (uint_fast32_t to_node: curr_outedges) {
+    //                 a.push_back(1.0f/curr_outedges.size());
+    //                 ja.push_back(to_node);
+    //                 ++num_nonzero_values;
+    //             }
+    //         }
+    //         ia.push_back(num_nonzero_values);
+
+    //         curr_node = from_node;
+    //         curr_outedges = std::set<uint_fast32_t> {to_node};
+    //     }
+
+    //     // num_nodes = std::max(std::max(from_node, to_node), num_nodes);
+    // }
+
+    // const uint_fast32_t curr_isdangling = curr_outedges.size() == 0;
+    // if (curr_isdangling) {
+    //     dangling_nodes.push_back(curr_node);
+    // }
+    // else {
+    //     for (uint_fast32_t to_node: curr_outedges) {
+    //         a.push_back(1.0f/curr_outedges.size());
+    //         ja.push_back(to_node);
+    //     }
+    //     ++curr_node;
+    // }
+    // num_nonzero_values += curr_outedges.size();
+    // ia.push_back(num_nonzero_values);
+
+    // // assume the node ids start from zero
+    // // ++num_nodes;
+    // // std::cout << "num nodes" << num_nodes << std::endl;
+    // num_rows = num_cols = num_nodes;
+
+    // for (; curr_node < num_nodes; ++curr_node) {
+    //     // std::cout << curr_node << ", ";
+    //     dangling_nodes.push_back(curr_node);
+    //     ia.push_back(num_nonzero_values);
+    // }
+
+    // // std::cout << "a" << a << std::endl;
+    // // std::cout << "ia" << ia << std::endl;
+    // // std::cout << "ja" << ja << std::endl;
+    // // std::cout << "dangling_nodes" << dangling_nodes << std::endl;
+
+    // file.close();
+}
+
+arma::fvec CSR::dot_transposed(const arma::fvec& vec) const
+{
     arma::fvec res(num_rows, arma::fill::zeros);
     for (uint_fast32_t i = 0; i < num_rows; ++i) {
         for (uint_fast32_t k = ia[i]; k < ia[i+1]; ++k) {
-            res[i] += a[k] * vec[ja[k]];
+            res[ja[k]] += a[k] * vec[i];
         }
     }
     return res;
@@ -208,17 +208,4 @@ std::vector<std::pair<uint_fast32_t, CSR>> CSR::split(uint_fast32_t n) const
     assert(i == ia.size());
     assert(j == a.size() and j == ja.size());
     return csrs;
-}
-
-
-CSR transpose(const CSC& csc)
-{
-    CSR csr;
-    csr.num_rows = csc.num_cols;
-    csr.num_cols = csc.num_rows;
-    csr.a = csc.a;
-    csr.ia = csc.ia;
-    csr.ja = csc.ja;
-    csr.dangling_nodes = csc.dangling_nodes;
-    return csr;
 }
