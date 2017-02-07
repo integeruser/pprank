@@ -4,7 +4,6 @@
 #include <iostream>
 #include <regex>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -33,15 +32,15 @@ CSR::CSR(const std::string& filename)
     const uint_fast32_t num_nodes = std::stoul(matches[1].str());
     const uint_fast32_t num_edges = std::stoul(matches[2].str());
 
+    a.reserve(num_edges);
+    ja.reserve(num_edges);
+
     // assumptions:
     //  - node ids start from zero
     //  - each line of the file represent an edge from a source node to a destination node
     //  - no duplicate edges
     //  - lines are ordered by source node id
     //  - lines that start with "#" are comments
-
-    a.reserve(num_edges);
-    ja.reserve(num_edges);
 
     uint_fast32_t num_nonzero_values = 0;
     ia.push_back(num_nonzero_values);
@@ -52,15 +51,9 @@ CSR::CSR(const std::string& filename)
     std::set<uint_fast32_t> curr_outedges;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        uint_fast32_t from_node, to_node;
-        if (!(iss >> from_node >> to_node)) {
-            // skip comments and malformed lines
-            if (line[0] != '#') {
-                std::cerr << "Malformed line: \"" << line << "\"" << std::endl;
-            }
-            continue;
-        }
+        char* endptr;
+        const uint_fast32_t from_node = std::strtoul(line.c_str(), &endptr, 10);
+        const uint_fast32_t to_node = std::strtoul(endptr, nullptr, 10);
 
         if (from_node == curr_node) {
             curr_outedges.insert(to_node);
