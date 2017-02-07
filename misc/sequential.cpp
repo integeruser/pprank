@@ -62,8 +62,13 @@ int main(int argc, char const *argv[])
         tol = std::atof(argv[2]);
     }
 
-    const Graph graph = Graph(filename);
-    const CSR csr = CSR(graph);
+    // const Graph graph = Graph(filename);
+
+    std::cout << "[*] Building CSR transition matrix..." << std::endl;
+    const CSR csr = CSR(filename);
+    std::cout << "        Dimensions: " << csr.num_rows << "×" << csr.num_cols << std::endl;
+    std::cout << "        Edges:      " << csr.a.size() << std::endl;
+    std::cout << "        Dangling:   " << csr.dangling_nodes.size() << std::endl;
 
     const auto results = pagerank(csr, tol);
     const auto iterations = results.first;

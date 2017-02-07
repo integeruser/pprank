@@ -13,147 +13,88 @@
 #include "armadillo"
 
 
-Graph::Graph(const std::string& filename)
+CSR::CSR()
 {
-    // assume the file contains two integers per line, separated by a whitespace
-    // each line represent an edge from a source node to a destination node
-    // checks for duplicate edges are NOT performed
+}
+
+CSR::CSR(const std::string& filename)
+{
     std::ifstream file(filename, std::ios::in);
 
-    num_nodes = 0;
+    // assumptions:
+    //  - node ids start from zero
+    //  - each line of the file represent an edge from a source node to a destination node
+    //  - no duplicate edges
+    //  - lines are ordered by source node id
+    //  - lines that start with "#" are comments
+
+    uint_fast32_t num_nodes = 0;
+    uint_fast32_t num_edges = 0;
+
+    uint_fast32_t num_nonzero_values = 0;
+    ia.push_back(num_nonzero_values);
+
+    uint_fast32_t curr_node = 0;
+    std::set<uint_fast32_t> curr_outedges;
+
     std::string line;
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         uint_fast32_t from_node, to_node;
         if (!(iss >> from_node >> to_node)) {
-            // skip malformed lines
+            // skip comments and malformed lines
+            if (line[0] != '#') {
+                std::cerr << "Malformed line: \"" << line << "\"" << std::endl;
+            }
             continue;
         }
 
-        outedges[from_node].insert(to_node);
+        if (from_node == curr_node) {
+            curr_outedges.insert(to_node);
+        }
+        else {
+            // add a row to the transition matrix
+            const uint_fast32_t curr_outdegree = curr_outedges.size();
+            for (uint_fast32_t to_node: curr_outedges) {
+                a.push_back(1.0f/curr_outdegree);
+                ja.push_back(to_node);
+            }
+            num_nonzero_values += curr_outdegree;
+            ia.push_back(num_nonzero_values);
+
+            // add dangling nodes until needed
+            for (uint_fast32_t node = curr_node+1; node < from_node; ++node) {
+                dangling_nodes.push_back(node);
+                ia.push_back(num_nonzero_values);
+            }
+
+            curr_node = from_node;
+            curr_outedges = {to_node};
+        }
 
         num_nodes = std::max(std::max(from_node, to_node), num_nodes);
+        ++num_edges;
     }
     // assume the node ids start from zero
     ++num_nodes;
+    num_rows = num_cols = num_nodes;
 
-    for (uint_fast32_t node = 0; node < num_nodes; ++node) {
-        const uint_fast32_t outdegree = outedges.count(node) > 0 ?
-                                        outedges.at(node).size() : 0;
-        const bool isdangling = outdegree == 0;
-        if (isdangling) {
-            dangling_nodes.insert(node);
-        }
+    // add a last row to the transition matrix
+    const uint_fast32_t curr_outdegree = curr_outedges.size();
+    for (uint_fast32_t to_node: curr_outedges) {
+        a.push_back(1.0f/curr_outdegree);
+        ja.push_back(to_node);
+    }
+    num_nonzero_values += curr_outedges.size();
+    ia.push_back(num_nonzero_values);
+
+    // add dangling nodes until needed
+    for (uint_fast32_t node = curr_node+1; node < num_nodes; ++node) {
+        dangling_nodes.push_back(node);
+        ia.push_back(num_nonzero_values);
     }
 
     file.close();
-}
-
-
-CSR::CSR()
-{
-}
-
-CSR::CSR(const Graph& graph)
-{
-    num_rows = num_cols = graph.num_nodes;
-    dangling_nodes = std::vector<uint_fast32_t>(graph.dangling_nodes.cbegin(), graph.dangling_nodes.cend());
-
-    uint_fast32_t num_nonzero_values = 0;
-    ia.push_back(num_nonzero_values);
-
-    for (uint_fast32_t from_node = 0; from_node < graph.num_nodes; ++from_node) {
-        const uint_fast32_t outdegree = graph.outedges.count(from_node) > 0 ?
-                                        graph.outedges.at(from_node).size() : 0;
-        if (outdegree > 0) {
-            for (uint_fast32_t to_node: graph.outedges.at(from_node)) {
-                a.push_back(1.0f/outdegree);
-                ja.push_back(to_node);
-            }
-            num_nonzero_values += outdegree;
-        }
-        ia.push_back(num_nonzero_values);
-    }
-}
-
-CSR::CSR(const std::string& filename)
-{
-    // std::ifstream file(filename, std::ios::in);
-
-    // uint_fast32_t num_nodes = 281903;
-    // uint_fast32_t num_edges = 2312497;
-
-    // uint_fast32_t num_nonzero_values = 0;
-    // ia.push_back(num_nonzero_values);
-
-    // uint_fast32_t curr_node = 0;
-    // std::set<uint_fast32_t> curr_outedges = std::set<uint_fast32_t>();
-
-    // std::string line;
-    // while (std::getline(file, line)) {
-    //     std::istringstream iss(line);
-    //     uint_fast32_t from_node, to_node;
-    //     if (!(iss >> from_node >> to_node)) {
-    //         // skip malformed lines
-    //         std::cout << "malformed " << line << std::endl;
-    //         continue;
-    //     }
-
-    //     if (from_node == curr_node) {
-    //         curr_outedges.insert(to_node);
-    //     }
-    //     else {
-    //         const uint_fast32_t curr_isdangling = curr_outedges.size() == 0;
-    //         if (curr_isdangling) {
-    //             dangling_nodes.push_back(curr_node);
-    //         }
-    //         else {
-    //             for (uint_fast32_t to_node: curr_outedges) {
-    //                 a.push_back(1.0f/curr_outedges.size());
-    //                 ja.push_back(to_node);
-    //                 ++num_nonzero_values;
-    //             }
-    //         }
-    //         ia.push_back(num_nonzero_values);
-
-    //         curr_node = from_node;
-    //         curr_outedges = std::set<uint_fast32_t> {to_node};
-    //     }
-
-    //     // num_nodes = std::max(std::max(from_node, to_node), num_nodes);
-    // }
-
-    // const uint_fast32_t curr_isdangling = curr_outedges.size() == 0;
-    // if (curr_isdangling) {
-    //     dangling_nodes.push_back(curr_node);
-    // }
-    // else {
-    //     for (uint_fast32_t to_node: curr_outedges) {
-    //         a.push_back(1.0f/curr_outedges.size());
-    //         ja.push_back(to_node);
-    //     }
-    //     ++curr_node;
-    // }
-    // num_nonzero_values += curr_outedges.size();
-    // ia.push_back(num_nonzero_values);
-
-    // // assume the node ids start from zero
-    // // ++num_nodes;
-    // // std::cout << "num nodes" << num_nodes << std::endl;
-    // num_rows = num_cols = num_nodes;
-
-    // for (; curr_node < num_nodes; ++curr_node) {
-    //     // std::cout << curr_node << ", ";
-    //     dangling_nodes.push_back(curr_node);
-    //     ia.push_back(num_nonzero_values);
-    // }
-
-    // // std::cout << "a" << a << std::endl;
-    // // std::cout << "ia" << ia << std::endl;
-    // // std::cout << "ja" << ja << std::endl;
-    // // std::cout << "dangling_nodes" << dangling_nodes << std::endl;
-
-    // file.close();
 }
 
 arma::fvec CSR::dot_transposed(const arma::fvec& vec) const
