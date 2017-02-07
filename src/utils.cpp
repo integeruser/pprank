@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <regex>
 #include <set>
 #include <sstream>
 #include <string>
@@ -21,6 +22,17 @@ CSR::CSR(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::in);
 
+    std::string line;
+
+    // parse header
+    std::regex header("# Nodes: ([0-9]+) Edges: ([0-9]+)");
+    std::smatch matches;
+    std::getline(file, line);
+    std::regex_search(line, matches, header);
+    assert(matches.size() == 3);
+    const uint_fast32_t num_nodes = std::stoul(matches[1].str());
+    const uint_fast32_t num_edges = std::stoul(matches[2].str());
+
     // assumptions:
     //  - node ids start from zero
     //  - each line of the file represent an edge from a source node to a destination node
@@ -28,16 +40,17 @@ CSR::CSR(const std::string& filename)
     //  - lines are ordered by source node id
     //  - lines that start with "#" are comments
 
-    uint_fast32_t num_nodes = 0;
-    uint_fast32_t num_edges = 0;
+    a.reserve(num_edges);
+    ja.reserve(num_edges);
 
     uint_fast32_t num_nonzero_values = 0;
     ia.push_back(num_nonzero_values);
 
+    uint_fast32_t num_nodes_read = 0;
+
     uint_fast32_t curr_node = 0;
     std::set<uint_fast32_t> curr_outedges;
 
-    std::string line;
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         uint_fast32_t from_node, to_node;
@@ -72,12 +85,13 @@ CSR::CSR(const std::string& filename)
             curr_outedges = {to_node};
         }
 
-        num_nodes = std::max(std::max(from_node, to_node), num_nodes);
-        ++num_edges;
+        num_nodes_read = std::max(std::max(from_node, to_node), num_nodes_read);
     }
     // assume the node ids start from zero
-    ++num_nodes;
-    num_rows = num_cols = num_nodes;
+    ++num_nodes_read;
+    assert(num_nodes_read == num_nodes);
+
+    num_rows = num_cols = num_nodes_read;
 
     // add a last row to the transition matrix
     const uint_fast32_t curr_outdegree = curr_outedges.size();
@@ -89,7 +103,7 @@ CSR::CSR(const std::string& filename)
     ia.push_back(num_nonzero_values);
 
     // add dangling nodes until needed
-    for (uint_fast32_t node = curr_node+1; node < num_nodes; ++node) {
+    for (uint_fast32_t node = curr_node+1; node < num_nodes_read; ++node) {
         dangling_nodes.push_back(node);
         ia.push_back(num_nonzero_values);
     }
