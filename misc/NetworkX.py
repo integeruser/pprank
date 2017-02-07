@@ -11,8 +11,10 @@ if __name__ == '__main__':
 
     print('[*] Building graph...')
     graph = nx.read_edgelist(args.file, create_using=nx.DiGraph(), nodetype=int)
-    print('        Nodes: %d' % len(graph.nodes()))
-    print('        Edges: %d' % len(graph.edges()))
+    print('        Nodes:    %d' % len(graph.nodes()))
+    print('        Edges:    %d' % len(graph.edges()))
+    print('        Dangling: %d' % sum(out_degree == 0
+                                       for node, out_degree in graph.out_degree().items()))
 
     print("[*] Computing PageRank (tol=%g)..." % args.tol)
     ranks = nx.pagerank(graph, tol=args.tol)
