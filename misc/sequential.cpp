@@ -13,7 +13,7 @@
 #include "prettyprint.hpp"
 
 
-std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const CSR& A, const float tol)
+std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const TCSR& A, const float tol)
 {
     assert(A.num_rows == A.num_cols);
 
@@ -36,7 +36,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const CSR& A, 
         p = p_new;
 
         const arma::fvec dangling = 1.0f/N * arma::sum(p(dangling_nodes)) * ones;
-        p_new = (1-d)/N * ones + d * (A.dot_transposed(p) + dangling);
+        p_new = (1-d)/N * ones + d * (A.tdot(p) + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
 
@@ -65,21 +65,21 @@ int main(int argc, char const *argv[])
     std::chrono::high_resolution_clock::time_point start_time, end_time;
     std::chrono::duration<float> duration;
 
-    std::cout << "[*] Building CSR transition matrix..." << std::flush;
+    std::cout << "[*] Building TCSR transition matrix..." << std::flush;
     start_time = std::chrono::high_resolution_clock::now();
-    const CSR csr = CSR(filename);
+    const TCSR tcsr = TCSR(filename);
     end_time = std::chrono::high_resolution_clock::now();
     duration = end_time-start_time;
     std::cout << "[" << duration.count() << " s]" << std::endl;
 
-    assert(csr.num_rows == csr.num_cols);
-    std::cout << "        Nodes:      " << csr.num_rows << std::endl;
-    std::cout << "        Edges:      " << csr.a.size() << std::endl;
-    std::cout << "        Dangling:   " << csr.dangling_nodes.size() << std::endl;
+    assert(tcsr.num_rows == tcsr.num_cols);
+    std::cout << "        Nodes:      " << tcsr.num_rows << std::endl;
+    std::cout << "        Edges:      " << tcsr.a.size() << std::endl;
+    std::cout << "        Dangling:   " << tcsr.dangling_nodes.size() << std::endl;
 
     std::cout << "[*] Computing PageRank (tol=" << tol << ")..." << std::flush;
     start_time = std::chrono::high_resolution_clock::now();
-    const auto results = pagerank(csr, tol);
+    const auto results = pagerank(tcsr, tol);
     end_time = std::chrono::high_resolution_clock::now();
     duration = end_time-start_time;
     std::cout << "[" << duration.count() << " s]" << std::endl;

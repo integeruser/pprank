@@ -9,19 +9,18 @@
 #include "armadillo"
 
 
-struct CSR {
+struct TCSR {
     uint_fast32_t num_rows, num_cols;
     std::vector<float> a;
-    std::vector<uint_fast32_t> ia;
-    std::vector<uint_fast32_t> ja;
+    std::vector<uint_fast32_t> ia, ja;
     std::vector<uint_fast32_t> dangling_nodes;
 
-    CSR();
-    CSR(const std::string&);
+    TCSR();
+    TCSR(const std::string&);
 
-    arma::fvec dot_transposed(const arma::fvec&) const;
+    arma::fvec tdot(const arma::fvec&) const;
 
-    std::vector<std::pair<uint_fast32_t, CSR>> split(uint_fast32_t) const;
+    std::vector<std::pair<uint_fast32_t, TCSR>> split(uint_fast32_t) const;
 };
 
 

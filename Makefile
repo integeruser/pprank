@@ -9,11 +9,6 @@ sequential:
 	src/utils.cpp misc/sequential.cpp \
 	-Iinclude -larmadillo
 
-notranspose:
-	$(CXX) -std=c++17 -O3 -Wall -o notranspose \
-	src/utils.cpp misc/notranspose.cpp \
-	-Iinclude
-
 
 tests:
 	$(CXX) -std=c++17 -O3 -Wall -o tests \
@@ -22,7 +17,7 @@ tests:
 
 
 all:
-	make pprank sequential notranspose tests
+	make pprank sequential tests
 
 clean:
-	rm -f pprank sequential notranspose tests
+	rm -f pprank sequential tests
