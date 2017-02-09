@@ -1,4 +1,5 @@
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <iomanip>
@@ -29,7 +30,6 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const CSR& A, 
 
     // ranks computation
     uint_fast32_t iterations = 0;
-    std::cout << "[*] Computing PageRank (tol=" << tol << ")..." << std::endl;
     do {
         ++iterations;
 
@@ -52,7 +52,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const CSR& A, 
 int main(int argc, char const *argv[])
 {
     if (!(argc == 2 || argc == 3)) {
-        std::cerr << "Usage: sequential filename [tol]" << std::endl;
+        std::cerr << "Usage: sequential file [tol]" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -62,15 +62,28 @@ int main(int argc, char const *argv[])
         tol = std::atof(argv[2]);
     }
 
-    // const Graph graph = Graph(filename);
+    std::chrono::high_resolution_clock::time_point start_time, end_time;
+    std::chrono::duration<float> duration;
 
-    std::cout << "[*] Building CSR transition matrix..." << std::endl;
+    std::cout << "[*] Building CSR transition matrix..." << std::flush;
+    start_time = std::chrono::high_resolution_clock::now();
     const CSR csr = CSR(filename);
-    std::cout << "        Dimensions: " << csr.num_rows << "×" << csr.num_cols << std::endl;
+    end_time = std::chrono::high_resolution_clock::now();
+    duration = end_time-start_time;
+    std::cout << "[" << duration.count() << " s]" << std::endl;
+
+    assert(csr.num_rows == csr.num_cols);
+    std::cout << "        Nodes:      " << csr.num_rows << std::endl;
     std::cout << "        Edges:      " << csr.a.size() << std::endl;
     std::cout << "        Dangling:   " << csr.dangling_nodes.size() << std::endl;
 
+    std::cout << "[*] Computing PageRank (tol=" << tol << ")..." << std::flush;
+    start_time = std::chrono::high_resolution_clock::now();
     const auto results = pagerank(csr, tol);
+    end_time = std::chrono::high_resolution_clock::now();
+    duration = end_time-start_time;
+    std::cout << "[" << duration.count() << " s]" << std::endl;
+
     const auto iterations = results.first;
     const auto ranks = results.second;
     std::cout << "[*] Ranks (after " << iterations << " iterations):" << std::endl;

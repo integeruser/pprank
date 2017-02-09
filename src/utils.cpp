@@ -1,9 +1,7 @@
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <regex>
-#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -19,7 +17,7 @@ CSR::CSR()
 
 CSR::CSR(const std::string& filename)
 {
-    std::ifstream file(filename, std::ios::in);
+    std::ifstream file(filename);
 
     std::string line;
 
@@ -32,71 +30,73 @@ CSR::CSR(const std::string& filename)
     const uint_fast32_t num_nodes = std::stoul(matches[1].str());
     const uint_fast32_t num_edges = std::stoul(matches[2].str());
 
+    num_rows = num_cols = num_nodes;
     a.reserve(num_edges);
     ja.reserve(num_edges);
 
     // assumptions:
-    //  - node ids start from zero
+    //  - node ids are zero-based
     //  - each line of the file represent an edge from a source node to a destination node
     //  - no duplicate edges
     //  - lines are ordered by source node id
-    //  - lines that start with "#" are comments
 
     uint_fast32_t num_nonzero_values = 0;
     ia.push_back(num_nonzero_values);
 
-    uint_fast32_t num_nodes_read = 0;
-
     uint_fast32_t curr_node = 0;
-    std::set<uint_fast32_t> curr_outedges;
+    uint_fast32_t curr_outdegree = 0;
 
-    while (std::getline(file, line)) {
-        char* endptr;
-        const uint_fast32_t from_node = std::strtoul(line.c_str(), &endptr, 10);
-        const uint_fast32_t to_node = std::strtoul(endptr, nullptr, 10);
+    const uint_fast32_t BUF_SIZE = 1024*16;
+    char buf[BUF_SIZE];
+    while (file) {
+        file.read(buf, BUF_SIZE);
+        const ssize_t bytes_read = file.gcount();
 
-        if (from_node == curr_node) {
-            curr_outedges.insert(to_node);
-        }
-        else {
-            // add a row to the transition matrix
-            const uint_fast32_t curr_outdegree = curr_outedges.size();
-            for (uint_fast32_t to_node: curr_outedges) {
-                a.push_back(1.0f/curr_outdegree);
-                ja.push_back(to_node);
-            }
-            num_nonzero_values += curr_outdegree;
-            ia.push_back(num_nonzero_values);
+        char* line = buf;
+        char* newline;
+        while ((newline = (char*) memchr(line, '\n', (buf+bytes_read)-line))) {
+            char* endptr;
+            const uint_fast32_t from_node = std::strtoul(line, &endptr, 10);
+            const uint_fast32_t to_node = std::strtoul(endptr, nullptr, 10);
 
-            // add dangling nodes until needed
-            for (uint_fast32_t node = curr_node+1; node < from_node; ++node) {
-                dangling_nodes.push_back(node);
+            // each line represents a directed edge between two nodes
+
+            if (from_node != curr_node) {
+                // all outedges of curr_node have been found
+                for (uint_fast32_t i = 0; i < curr_outdegree; ++i) {
+                    a.push_back(1.0f/curr_outdegree);
+                }
+                num_nonzero_values += curr_outdegree;
                 ia.push_back(num_nonzero_values);
+
+                // if needed, add dangling nodes
+                for (uint_fast32_t node = curr_node+1; node < from_node; ++node) {
+                    dangling_nodes.push_back(node);
+                    ia.push_back(num_nonzero_values);
+                }
+
+                curr_node = from_node;
+                curr_outdegree = 0;
             }
+            ++curr_outdegree;
+            ja.push_back(to_node);
 
-            curr_node = from_node;
-            curr_outedges = {to_node};
+            line = newline+1;
         }
-
-        num_nodes_read = std::max(std::max(from_node, to_node), num_nodes_read);
+        const auto bytes_consumed = line-buf;
+        file.seekg(-off_t (bytes_read-bytes_consumed), std::ios_base::cur);
     }
-    // assume the node ids start from zero
-    ++num_nodes_read;
-    assert(num_nodes_read == num_nodes);
 
-    num_rows = num_cols = num_nodes_read;
-
-    // add a last row to the transition matrix
-    const uint_fast32_t curr_outdegree = curr_outedges.size();
-    for (uint_fast32_t to_node: curr_outedges) {
+    // add outedges of the last node
+    for (uint_fast32_t i = 0; i < curr_outdegree; ++i) {
         a.push_back(1.0f/curr_outdegree);
-        ja.push_back(to_node);
     }
-    num_nonzero_values += curr_outedges.size();
+    num_nonzero_values += curr_outdegree;
     ia.push_back(num_nonzero_values);
+    assert(num_nonzero_values == num_edges);
 
-    // add dangling nodes until needed
-    for (uint_fast32_t node = curr_node+1; node < num_nodes_read; ++node) {
+    // if needed, add dangling nodes
+    for (uint_fast32_t node = curr_node+1; node < num_nodes; ++node) {
         dangling_nodes.push_back(node);
         ia.push_back(num_nonzero_values);
     }
