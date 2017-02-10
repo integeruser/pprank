@@ -37,6 +37,7 @@ TCSR::TCSR(const std::string& filename)
     //  - node ids are zero-based
     //  - no duplicate edges
     //  - edges are ordered by source node id
+    //  - the file ends with a newline
 
     std::ifstream file(filename);
 
@@ -74,6 +75,7 @@ TCSR::TCSR(const std::string& filename)
             read_edge(line, from_node, to_node);
 
             if (from_node != curr_node) {
+                assert(curr_node < from_node);
                 // all outedges of curr_node have been found
                 for (uint_fast32_t i = 0; i < curr_outdegree; ++i) {
                     a.push_back(1.0f/curr_outdegree);
