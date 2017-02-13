@@ -125,7 +125,7 @@ TCSR::TCSR(const std::string& filename)
 arma::fvec TCSR::tdot(const arma::fvec& vec) const
 {
     // compute a matrix-vector product with the matrix transposed
-    arma::fvec res(num_rows, arma::fill::zeros);
+    arma::fvec res(num_cols, arma::fill::zeros);
     for (uint_fast32_t i = 0; i < num_rows; ++i) {
         for (uint_fast32_t k = ia[i]; k < ia[i+1]; ++k) {
             res[ja[k]] += a[k] * vec[i];
