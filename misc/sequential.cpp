@@ -49,7 +49,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const TCSR& A,
 }
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     if (!(argc == 2 || argc == 3)) {
         std::cerr << "Usage: sequential file [tol]" << std::endl;

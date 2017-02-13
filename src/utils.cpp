@@ -74,7 +74,7 @@ TCSR::TCSR(const std::string& filename)
         char *line, *newline_char;
         for (line = buf; (newline_char = (char*) memchr(line, '\n', (buf+bytes_read)-line)); line = newline_char+1) {
             // skip lines starting with '#'
-            if (line[0] == '#') continue;
+            if (line[0] == '#') { continue; }
 
             // each line represents a directed edge between two nodes
             uint_fast32_t from_node, to_node;
