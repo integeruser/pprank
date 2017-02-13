@@ -34,7 +34,7 @@ TCSR::TCSR(const std::string& filename)
     // each line of the file represents an edge from a source node to a destination node
 
     // assumptions:
-    //  - first line of file is the header "Nodes: <num_nodes> Edges: <num_edges>"
+    //  - filename must contain the number of nodes and the number of edges of the graph in the form "(\d+)-(\d+)"
     //  - node ids are zero-based
     //  - no duplicate edges
     //  - edges are ordered by source node id
@@ -43,11 +43,9 @@ TCSR::TCSR(const std::string& filename)
     std::ifstream file(filename);
 
     // parse header
-    std::regex re_header("# Nodes: ([0-9]+) Edges: ([0-9]+)");
+    std::regex header("(?:([0-9]*)-([0-9]*))(?!.*[0-9]*-[0-9]*)");
     std::smatch matches;
-    std::string header;
-    std::getline(file, header);
-    std::regex_search(header, matches, re_header);
+    std::regex_search(filename, matches, header);
     if (matches.size() != 3) {
         std::cerr << "[Err] Malformed header!" << std::endl;
         std::exit(EXIT_FAILURE);
