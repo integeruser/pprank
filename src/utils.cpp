@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <regex>
 #include <string>
@@ -42,12 +43,15 @@ TCSR::TCSR(const std::string& filename)
     std::ifstream file(filename);
 
     // parse header
-    std::regex header("# Nodes: ([0-9]+) Edges: ([0-9]+)");
+    std::regex re_header("# Nodes: ([0-9]+) Edges: ([0-9]+)");
     std::smatch matches;
-    std::string line;
-    std::getline(file, line);
-    std::regex_search(line, matches, header);
-    assert(matches.size() == 3);
+    std::string header;
+    std::getline(file, header);
+    std::regex_search(header, matches, re_header);
+    if (matches.size() != 3) {
+        std::cerr << "[Err] Malformed header!" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
     const uint_fast32_t num_nodes = std::stoul(matches[1].str());
     const uint_fast32_t num_edges = std::stoul(matches[2].str());
 
