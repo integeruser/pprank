@@ -44,11 +44,11 @@ TCSR::TCSR(const std::string& filename)
     std::ifstream file(filename);
 
     // parse header
-    std::regex header("(?:([0-9]*)-([0-9]*))(?!.*[0-9]*-[0-9]*)");
+    std::regex header("(?:([0-9]+)-([0-9]+))(?!.*[0-9]*-[0-9]*)");
     std::smatch matches;
     std::regex_search(filename, matches, header);
     if (matches.size() != 3) {
-        std::cerr << "[Err] Malformed header!" << std::endl;
+        std::cerr << "[!] Filename not compliant!" << std::endl;
         std::exit(EXIT_FAILURE);
     }
     const uint_fast32_t num_nodes = std::stoul(matches[1].str());
