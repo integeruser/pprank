@@ -98,9 +98,6 @@ TCSR::TCSR(const std::string& filename)
             }
             ++curr_outdegree;
             ja.push_back(to_node);
-
-            // advance line pointer to the next line
-            line = newline_char+1;
         }
         const ptrdiff_t bytes_consumed = line-buf;
         file.seekg(-(bytes_read-bytes_consumed), std::ios_base::cur);
