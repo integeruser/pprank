@@ -35,6 +35,7 @@ TCSR::TCSR(const std::string& filename)
 
     // assumptions:
     //  - filename must contain the number of nodes and the number of edges of the graph in the form "(\d+)-(\d+)"
+    //  - lines starting with '#' are ignored
     //  - node ids are zero-based
     //  - no duplicate edges
     //  - edges are ordered by source node id
@@ -72,6 +73,9 @@ TCSR::TCSR(const std::string& filename)
 
         char *line, *newline_char;
         for (line = buf; (newline_char = (char*) memchr(line, '\n', (buf+bytes_read)-line)); line = newline_char+1) {
+            // skip lines starting with '#'
+            if (line[0] == '#') continue;
+
             // each line represents a directed edge between two nodes
             uint_fast32_t from_node, to_node;
             read_edge(line, from_node, to_node);
