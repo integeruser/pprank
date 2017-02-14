@@ -20,7 +20,7 @@ int rank;
 int num_processes;
 
 
-std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const TCSR& A, const float tol)
+std::pair<uint_fast32_t, arma::fvec> pagerank(const TCSR& A, const float tol)
 {
     assert(A.num_rows == A.num_cols);
 
@@ -68,12 +68,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const TCSR& A,
     while (arma::norm(p_new-p, 1) >= tol);
     p = p_new;
 
-    // map each node to its rank
-    std::map<uint_fast32_t, float> ranks;
-    for (uint_fast32_t node = 0; node < N; ++node) {
-        ranks[node] = p[node];
-    }
-    return std::make_pair(iterations, ranks);
+    return std::make_pair(iterations, p);
 }
 
 
@@ -123,10 +118,8 @@ int main(int argc, char *argv[])
         const auto iterations = results.first;
         const auto ranks = results.second;
         std::cout << "[*] Ranks (after " << iterations << " iterations):" << std::endl;
-        for (const auto pair: ranks) {
-            const uint_fast32_t node = pair.first;
-            const float rank = pair.second;
-            std::cout << "        " << std::setfill('0') << std::setw(9) << node << ": " << rank << std::endl;
+        for (uint_fast32_t node = 0; node < ranks.size(); ++node) {
+            std::cout << "        " << std::setfill('0') << std::setw(9) << node << ": " << ranks[node] << std::endl;
         }
     }
 
