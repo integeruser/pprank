@@ -66,6 +66,7 @@ std::pair<uint_fast32_t, std::map<uint_fast32_t, float>> pagerank(const TCSR& A,
         p_new = (1-d)/N * ones + d * (prod + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
+    p = p_new;
 
     // map each node to its rank
     std::map<uint_fast32_t, float> ranks;
