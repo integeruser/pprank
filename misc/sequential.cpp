@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -82,10 +83,14 @@ int main(int argc, char *argv[])
 
     const auto iterations = results.first;
     const auto ranks = results.second;
-    std::cout << "[*] Ranks (after " << iterations << " iterations):" << std::endl;
+    std::cout << "[*] Finished in " << iterations << " iterations" << std::endl;
+
+    std::ofstream outfile("PageRanks-" + std::to_string(tcsr.num_rows) + "-" + std::to_string(tcsr.a.size()) + ".txt");
+    outfile << std::fixed << std::scientific;
     for (uint_fast32_t node = 0; node < ranks.size(); ++node) {
-        std::cout << "        " << std::setfill('0') << std::setw(9) << node << ": " << ranks[node] << std::endl;
+        outfile << std::setfill('0') << std::setw(9) << node << ": " << ranks[node] << std::endl;
     }
+    outfile.close();
 
     return EXIT_SUCCESS;
 }
