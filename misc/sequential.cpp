@@ -13,6 +13,8 @@
 #include "armadillo"
 #include "prettyprint.hpp"
 
+using hrc = std::chrono::high_resolution_clock;
+
 
 std::pair<uint_fast32_t, arma::fvec> pagerank(const TCSR& A, const float tol)
 {
@@ -20,29 +22,24 @@ std::pair<uint_fast32_t, arma::fvec> pagerank(const TCSR& A, const float tol)
 
     // initialization
     const uint_fast32_t N = A.num_rows;
-
-    arma::fvec p, p_new(N);
-    p_new.fill(1.0f/N);
-
+    const float d = 0.85f;
+    const arma::fvec ones(N, arma::fill::ones);
     const arma::uvec dangling_nodes = arma::conv_to<arma::uvec>::from(A.dangling_nodes);
 
-    const arma::fvec ones(N, arma::fill::ones);
-    const float d = 0.85f;
+    arma::fvec p(N), p_new(N);
+    p_new.fill(1.0f/N);
 
     // ranks computation
     uint_fast32_t iterations = 0;
     do {
         ++iterations;
-
         p = p_new;
 
-        const arma::fvec dangling = 1.0f/N * arma::sum(p(dangling_nodes)) * ones;
-        p_new = (1-d)/N * ones + d * (A.tdot(p) + dangling);
+        const arma::fvec dangling = arma::sum(p(dangling_nodes))/N * ones;
+        p_new = (1.0f-d)/N * ones + d * (A.tdot(p) + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
-    p = p_new;
-
-    return std::make_pair(iterations, p);
+    return std::make_pair(iterations, p_new);
 }
 
 
@@ -59,31 +56,37 @@ int main(int argc, char *argv[])
         tol = std::atof(argv[2]);
     }
 
-    std::chrono::high_resolution_clock::time_point start_time, end_time;
+    hrc::time_point start_time, end_time;
     std::chrono::duration<float> duration;
 
-    std::cout << "[*] Building TCSR transition matrix..." << std::flush;
-    start_time = std::chrono::high_resolution_clock::now();
+    // build the TCSR matrix
+    std::cout << "[*] Building the sparse transition matrix..." << std::flush;
+    start_time = hrc::now();
+
     const TCSR tcsr = TCSR(filename);
-    end_time = std::chrono::high_resolution_clock::now();
+    assert(tcsr.num_rows == tcsr.num_cols);
+
+    end_time = hrc::now();
     duration = end_time-start_time;
     std::cout << "[" << duration.count() << " s]" << std::endl;
-
-    assert(tcsr.num_rows == tcsr.num_cols);
     std::cout << "        Nodes:      " << tcsr.num_rows << std::endl;
     std::cout << "        Edges:      " << tcsr.a.size() << std::endl;
     std::cout << "        Dangling:   " << tcsr.dangling_nodes.size() << std::endl;
 
-    std::cout << "[*] Computing PageRank (tol=" << tol << ")..." << std::flush;
-    start_time = std::chrono::high_resolution_clock::now();
-    const auto results = pagerank(tcsr, tol);
-    end_time = std::chrono::high_resolution_clock::now();
-    duration = end_time-start_time;
-    std::cout << "[" << duration.count() << " s]" << std::endl;
+    // compute PageRanks
+    std::cout << "[*] Computing PageRanks (tol=" << tol << ")..." << std::flush;
+    start_time = hrc::now();
 
-    const auto iterations = results.first;
-    const auto ranks = results.second;
-    std::cout << "[*] Finished in " << iterations << " iterations" << std::endl;
+    const std::pair<uint_fast32_t, arma::fvec> results = pagerank(tcsr, tol);
+    const uint_fast32_t iterations = results.first;
+    const arma::fvec ranks = results.second;
+
+    end_time = hrc::now();
+    duration = end_time-start_time;
+    std::cout << "[" << iterations << " iterations - " << duration.count() << " s]" << std::endl;
+
+    // write PageRanks to file
+    std::cout << "[*] Writing PageRanks to file..." << std::endl;
 
     std::ofstream outfile("PageRanks-" + std::to_string(tcsr.num_rows) + "-" + std::to_string(tcsr.a.size()) + ".txt");
     outfile << std::fixed << std::scientific;
