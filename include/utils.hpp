@@ -8,17 +8,27 @@
 
 #include "armadillo"
 
+#ifdef ACCURATE
+using pprank_t = double;
+using pprank_vec_t = arma::vec;
+#define PPRANK_MPI_T MPI_DOUBLE
+#else
+using pprank_t = float;
+using pprank_vec_t = arma::fvec;
+#define PPRANK_MPI_T MPI_FLOAT
+#endif
+
 
 struct TCSR {
     uint_fast32_t num_rows, num_cols;
-    std::vector<float> a;
+    std::vector<pprank_t> a;
     std::vector<uint_fast32_t> ia, ja;
     std::vector<uint_fast32_t> dangling_nodes;
 
     TCSR();
     TCSR(const std::string&);
 
-    arma::fvec tdot(const arma::fvec&) const;
+    pprank_vec_t tdot(const pprank_vec_t&) const;
 
     std::vector<std::pair<uint_fast32_t, TCSR>> split(uint_fast32_t) const;
 };

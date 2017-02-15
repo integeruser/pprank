@@ -84,7 +84,7 @@ TCSR::TCSR(const std::string& filename)
                 assert(curr_node < from_node);
                 // all outedges of curr_node have been found
                 for (uint_fast32_t i = 0; i < curr_outdegree; ++i) {
-                    a.push_back(1.0f/curr_outdegree);
+                    a.push_back(1.0/curr_outdegree);
                 }
                 num_nonzero_values += curr_outdegree;
                 ia.push_back(num_nonzero_values);
@@ -107,7 +107,7 @@ TCSR::TCSR(const std::string& filename)
 
     // add outedges of the last parsed node
     for (uint_fast32_t i = 0; i < curr_outdegree; ++i) {
-        a.push_back(1.0f/curr_outdegree);
+        a.push_back(1.0/curr_outdegree);
     }
     num_nonzero_values += curr_outdegree;
     ia.push_back(num_nonzero_values);
@@ -122,10 +122,10 @@ TCSR::TCSR(const std::string& filename)
     file.close();
 }
 
-arma::fvec TCSR::tdot(const arma::fvec& vec) const
+pprank_vec_t TCSR::tdot(const pprank_vec_t& vec) const
 {
     // compute a matrix-vector product with the matrix transposed
-    arma::fvec res(num_cols, arma::fill::zeros);
+    pprank_vec_t res(num_cols, arma::fill::zeros);
     for (uint_fast32_t i = 0; i < num_rows; ++i) {
         for (uint_fast32_t k = ia[i]; k < ia[i+1]; ++k) {
             res[ja[k]] += a[k] * vec[i];
@@ -141,7 +141,7 @@ std::vector<std::pair<uint_fast32_t, TCSR>> TCSR::split(uint_fast32_t n) const
 
     // compute maximum size of each submatrix
     // note that the last submatrix can have a smaller size than the others
-    const uint_fast32_t size = ceil(float(num_rows)/n);
+    const uint_fast32_t size = ceil(((pprank_t)num_rows)/n);
 
     int totoff = 0;
     std::vector<std::pair<uint_fast32_t, TCSR>> tcsrs;

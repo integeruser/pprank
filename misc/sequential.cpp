@@ -16,18 +16,18 @@
 using hrc = std::chrono::high_resolution_clock;
 
 
-std::pair<uint_fast32_t, arma::fvec> pagerank(const TCSR& A, const float tol)
+std::pair<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t tol)
 {
     assert(A.num_rows == A.num_cols);
 
     // initialization
     const uint_fast32_t N = A.num_rows;
-    const float d = 0.85f;
-    const arma::fvec ones(N, arma::fill::ones);
+    const pprank_t d = 0.85;
+    const pprank_vec_t ones(N, arma::fill::ones);
     const arma::uvec dangling_nodes = arma::conv_to<arma::uvec>::from(A.dangling_nodes);
 
-    arma::fvec p(N), p_new(N);
-    p_new.fill(1.0f/N);
+    pprank_vec_t p(N), p_new(N);
+    p_new.fill(1.0/N);
 
     // ranks computation
     uint_fast32_t iterations = 0;
@@ -35,8 +35,8 @@ std::pair<uint_fast32_t, arma::fvec> pagerank(const TCSR& A, const float tol)
         ++iterations;
         p = p_new;
 
-        const arma::fvec dangling = arma::sum(p(dangling_nodes))/N * ones;
-        p_new = (1.0f-d)/N * ones + d * (A.tdot(p) + dangling);
+        const pprank_vec_t dangling = arma::sum(p(dangling_nodes))/N * ones;
+        p_new = (1.0-d)/N * ones + d * (A.tdot(p) + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
     return std::make_pair(iterations, p_new);
@@ -51,13 +51,13 @@ int main(int argc, char *argv[])
     }
 
     const char* filename = argv[1];
-    float tol = 1e-6f;
+    pprank_t tol = 1e-6;
     if (argc == 3) {
         tol = std::atof(argv[2]);
     }
 
     hrc::time_point start_time, end_time;
-    std::chrono::duration<float> duration;
+    std::chrono::duration<pprank_t> duration;
 
     // build the TCSR matrix
     std::cout << "[*] Building the sparse transition matrix..." << std::flush;
@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
     std::cout << "[*] Computing PageRanks (tol=" << tol << ")..." << std::flush;
     start_time = hrc::now();
 
-    const std::pair<uint_fast32_t, arma::fvec> results = pagerank(tcsr, tol);
+    const std::pair<uint_fast32_t, pprank_vec_t> results = pagerank(tcsr, tol);
     const uint_fast32_t iterations = results.first;
-    const arma::fvec ranks = results.second;
+    const pprank_vec_t ranks = results.second;
 
     end_time = hrc::now();
     duration = end_time-start_time;
