@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
     if (argc != 2) {
-        std::cerr << "Usage: sequential file" << std::endl;
+        std::cerr << "Usage: pprank file" << std::endl;
         return EXIT_FAILURE;
     }
     const char* filename = argv[1];
