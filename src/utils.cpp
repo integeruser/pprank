@@ -136,43 +136,42 @@ pprank_vec_t TCSR::tdot(const pprank_vec_t& vec) const
 
 std::vector<std::pair<uint_fast32_t, TCSR>> TCSR::split(uint_fast32_t n) const
 {
-    // TODO clean
+    // split the matrix by rows into n submatrices
     assert(0 < n and n <= num_rows);
 
     // compute maximum size of each submatrix
-    // note that the last submatrix can have a smaller size than the others
-    const uint_fast32_t size = ceil(((pprank_t)num_rows)/n);
+    // note that the last one can have fewer rows than the others
+    const uint_fast32_t num_rows_sub = std::ceil(((pprank_t) num_rows)/n);
 
-    int totoff = 0;
-    std::vector<std::pair<uint_fast32_t, TCSR>> tcsrs;
+    std::vector<std::pair<uint_fast32_t, TCSR>> split;
     uint_fast32_t i = 1, j = 0;
-    uint_fast32_t offset = 0;
+    uint_fast32_t start = 0, offset = 0;
     do {
-        auto subtcsr = TCSR();
+        TCSR tcsr_sub = TCSR();
 
-        subtcsr.ia.push_back(0);
-        for (uint_fast32_t k = 0; i < ia.size() && k < size; ++k) {
-            subtcsr.ia.push_back(ia[i] - offset);
-            ++i;
+        tcsr_sub.ia.push_back(0);
+
+        for (uint_fast32_t k = 0; i < ia.size() and k < num_rows_sub; ++i, ++k) {
+            tcsr_sub.ia.push_back(ia[i]-start);
         }
-        offset += subtcsr.ia.back();
-        assert(((tcsrs.size() < n-1) and subtcsr.ia.size() == size+1) or
-               ((tcsrs.size() == n-1) and subtcsr.ia.size() <= size+1));
+        start += tcsr_sub.ia.back();
+        assert(((split.size() < n-1) and tcsr_sub.ia.size() == num_rows_sub+1) or
+               ((split.size() == n-1) and tcsr_sub.ia.size() <= num_rows_sub+1));
 
-        for (uint_fast32_t k = 0; k < subtcsr.ia.back(); ++k) {
-            subtcsr.a.push_back(a[j]);
-            subtcsr.ja.push_back(ja[j]);
-            ++j;
+        for (uint_fast32_t k = 0; k < tcsr_sub.ia.back(); ++j, ++k) {
+            tcsr_sub.a.push_back(a[j]);
+            tcsr_sub.ja.push_back(ja[j]);
         }
 
-        subtcsr.num_rows = subtcsr.ia.size()-1;
-        subtcsr.num_cols = num_cols;
-        tcsrs.push_back(std::make_pair(totoff, subtcsr));
-        totoff += size;
+        tcsr_sub.num_rows = tcsr_sub.ia.size()-1;
+        tcsr_sub.num_cols = num_cols;
+
+        split.push_back(std::make_pair(offset, tcsr_sub));
+        offset += num_rows_sub;
     }
-    while (tcsrs.size() < n);
+    while (split.size() < n);
 
     assert(i == ia.size());
     assert(j == a.size() and j == ja.size());
-    return tcsrs;
+    return split;
 }

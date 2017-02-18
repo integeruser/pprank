@@ -16,9 +16,9 @@ if __name__ == '__main__':
     print('        Dangling: %d' % sum(out_degree == 0
                                        for node, out_degree in graph.out_degree().items()))
 
-    print("[*] Computing PageRank (tol=%g)..." % args.tol)
+    print("[*] Computing PageRanks (tol=%g)..." % args.tol)
     ranks = nx.pagerank(graph, tol=args.tol)
 
-    print('[*] Ranks:')
+    print('[*] PageRanks:')
     for node, rank in sorted(ranks.items()):
         print('        %0.9d: %g' % (node, rank))
