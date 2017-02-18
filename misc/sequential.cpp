@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 
     end_time = hrc::now();
     duration = end_time-start_time;
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << "[" << duration.count() << " s]" << std::endl;
     std::cout << "        Nodes:      " << tcsr.num_rows << std::endl;
     std::cout << "        Edges:      " << tcsr.a.size() << std::endl;
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
     const pprank_t tol = 1e-6;
 
     // compute PageRanks
+    std::cout << std::fixed << std::scientific;
     std::cout << "[*] Computing PageRanks (tol=" << tol << ")..." << std::flush;
     start_time = hrc::now();
 
@@ -81,6 +83,7 @@ int main(int argc, char *argv[])
 
     end_time = hrc::now();
     duration = end_time-start_time;
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << "[" << iterations << " iterations - " << duration.count() << " s]" << std::endl;
     ////////////////////////////////////////////////////////////////////////////
 
@@ -97,6 +100,7 @@ int main(int argc, char *argv[])
 
     end_time = hrc::now();
     duration = end_time-start_time;
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << "[" << duration.count() << " s]" << std::endl;
 
     return EXIT_SUCCESS;
