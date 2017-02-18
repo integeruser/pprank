@@ -11,7 +11,6 @@
 #include "utils.hpp"
 
 #include "armadillo"
-#include "prettyprint.hpp"
 
 using hrc = std::chrono::high_resolution_clock;
 

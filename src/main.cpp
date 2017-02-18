@@ -11,7 +11,6 @@
 #include "utils.hpp"
 
 #include "armadillo"
-#include "prettyprint.hpp"
 
 #include "mpi.h"
 
