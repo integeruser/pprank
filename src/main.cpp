@@ -23,7 +23,7 @@ int rank;
 int num_processes;
 
 
-std::tuple<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t tol)
+std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, const pprank_t tol)
 {
     assert(A.num_rows == A.num_cols);
 
@@ -47,25 +47,42 @@ std::tuple<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t t
     MPI_Barrier(MPI_COMM_WORLD);
 
     // ranks computation
+    double start_time, work_time = 0.0, net_time = 0.0;
     uint_fast32_t iterations = 0;
     do {
         ++iterations;
         p = p_new;
 
-        // each process computes the matrix-vector product only for its block of rows
+        // each node calculates a partial result of the matrix-vector product
+        start_time = MPI_Wtime();
+
         const TCSR A_block = blocks[rank].second;
         const pprank_vec_t subvec = p.subvec(blocks_displacements[rank], blocks_displacements[rank]+blocks_num_rows[rank]-1);
         const pprank_vec_t prod_block = A_block.tdot(subvec);
 
-        // gather the results of the matrix-vector products
+        work_time += MPI_Wtime()-start_time;
+        ////////////////////////////////////////////////////////////////////////
+
+        // collect and sum the partial results of all the nodes
+        // each node must receive the contributions from all the others (very heavy!)
+        start_time = MPI_Wtime();
+
         pprank_vec_t prod(N);
         MPI_Allreduce(prod_block.memptr(), prod.memptr(), N, PPRANK_MPI_T, MPI_SUM, MPI_COMM_WORLD);
 
+        net_time += MPI_Wtime()-start_time;
+        ////////////////////////////////////////////////////////////////////////
+
+        // update PageRanks
+        start_time = MPI_Wtime();
+
         const pprank_vec_t dangling = arma::sum(p(dangling_nodes))/N * ones;
         p_new = (1.0-d)/N * ones + d * (prod + dangling);
+
+        work_time += MPI_Wtime()-start_time;
     }
     while (arma::norm(p_new-p, 1) >= tol);
-    return std::make_tuple(iterations, communication_time, p_new);
+    return std::make_tuple(iterations, work_time, net_time, p_new);
 }
 
 
@@ -115,14 +132,17 @@ int main(int argc, char *argv[])
     }
 
     uint_fast32_t iterations;
+    double work_time, net_time;
     pprank_vec_t ranks;
-    std::tie(iterations, ranks) = pagerank(tcsr, tol);
+    std::tie(iterations, work_time, net_time, ranks) = pagerank(tcsr, tol);
 
     if (rank == MASTER) {
         end_time = hrc::now();
         duration = end_time-start_time;
-        std::cout << "[" << iterations << " iterations - " << duration.count() << " s]" << std::endl;
         std::cout << std::fixed << std::setprecision(2);
+        std::cout << "[" << iterations << " iterations / " << duration.count() << " s]" << std::endl;
+        std::cout << "        Work time:  " << work_time << " s" << std::endl;
+        std::cout << "        Net time:   " << net_time << " s" << std::endl;
     }
     ////////////////////////////////////////////////////////////////////////////
 
