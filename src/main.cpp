@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
-#include <utility>
+#include <tuple>
 
 #include "utils.hpp"
 
@@ -23,7 +23,7 @@ int rank;
 int num_processes;
 
 
-std::pair<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t tol)
+std::tuple<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t tol)
 {
     assert(A.num_rows == A.num_cols);
 
@@ -65,7 +65,7 @@ std::pair<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t to
         p_new = (1.0-d)/N * ones + d * (prod + dangling);
     }
     while (arma::norm(p_new-p, 1) >= tol);
-    return std::make_pair(iterations, p_new);
+    return std::make_tuple(iterations, communication_time, p_new);
 }
 
 
@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
         start_time = hrc::now();
     }
 
-    const std::pair<uint_fast32_t, pprank_vec_t> results = pagerank(tcsr, tol);
-    const uint_fast32_t iterations = results.first;
-    const pprank_vec_t ranks = results.second;
+    uint_fast32_t iterations;
+    pprank_vec_t ranks;
+    std::tie(iterations, ranks) = pagerank(tcsr, tol);
 
     if (rank == MASTER) {
         end_time = hrc::now();
