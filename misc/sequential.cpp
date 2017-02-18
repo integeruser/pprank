@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     hrc::time_point start_time, end_time;
     std::chrono::duration<pprank_t> duration;
 
-    // build the TCSR matrix
+    // build the sparse transition matrix
     std::cout << "[*] Building the sparse transition matrix..." << std::flush;
     start_time = hrc::now();
 
@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
     std::cout << "        Nodes:      " << tcsr.num_rows << std::endl;
     std::cout << "        Edges:      " << tcsr.a.size() << std::endl;
     std::cout << "        Dangling:   " << tcsr.dangling_nodes.size() << std::endl;
+    ////////////////////////////////////////////////////////////////////////////
 
     const pprank_t tol = 1e-6;
 
@@ -81,6 +82,7 @@ int main(int argc, char *argv[])
     end_time = hrc::now();
     duration = end_time-start_time;
     std::cout << "[" << iterations << " iterations - " << duration.count() << " s]" << std::endl;
+    ////////////////////////////////////////////////////////////////////////////
 
     // write PageRanks to file
     std::cout << "[*] Writing PageRanks to file..." << std::endl;
