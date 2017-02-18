@@ -76,16 +76,11 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
-    if (!(argc == 2 || argc == 3)) {
-        std::cerr << "Usage: sequential file [tol]" << std::endl;
+    if (argc != 2) {
+        std::cerr << "Usage: sequential file" << std::endl;
         return EXIT_FAILURE;
     }
-
     const char* filename = argv[1];
-    pprank_t tol = 1e-6;
-    if (argc == 3) {
-        tol = std::atof(argv[2]);
-    }
 
     hrc::time_point start_time, end_time;
     std::chrono::duration<pprank_t> duration;
@@ -107,6 +102,8 @@ int main(int argc, char *argv[])
         std::cout << "        Edges:      " << tcsr.a.size() << std::endl;
         std::cout << "        Dangling:   " << tcsr.dangling_nodes.size() << std::endl;
     }
+
+    const pprank_t tol = 1e-6;
 
     // compute PageRanks
     if (rank == MASTER) {
