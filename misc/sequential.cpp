@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////////////////////
 
     // write PageRanks to file
-    std::cout << "[*] Writing PageRanks to file..." << std::endl;
+    std::cout << "[*] Writing PageRanks to file..." << std::flush;
+    start_time = hrc::now();
 
     std::ofstream outfile("PageRanks-" + std::to_string(tcsr.num_rows) + "-" + std::to_string(tcsr.a.size()) + ".txt");
     outfile << std::fixed << std::scientific;
@@ -93,6 +94,10 @@ int main(int argc, char *argv[])
         outfile << std::setfill('0') << std::setw(9) << node << ": " << ranks[node] << std::endl;
     }
     outfile.close();
+
+    end_time = hrc::now();
+    duration = end_time-start_time;
+    std::cout << "[" << duration.count() << " s]" << std::endl;
 
     return EXIT_SUCCESS;
 }
