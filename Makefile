@@ -5,7 +5,7 @@ sequential:
 
 pprank:
 	mpic++ -std=c++11 -march=native -O3 -Wall -o pprank \
-	src/main.cpp src/utils.cpp \
+	src/pprank.cpp src/utils.cpp \
 	-Iinclude -larmadillo
 
 tests:
