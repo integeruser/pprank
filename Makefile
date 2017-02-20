@@ -1,14 +1,12 @@
+sequential:
+	$(CXX) -std=c++11 -march=native -O3 -Wall -o sequential \
+	src/sequential.cpp src/utils.cpp \
+	-Iinclude -larmadillo
+
 pprank:
 	mpic++ -std=c++11 -march=native -O3 -Wall -o pprank \
 	src/main.cpp src/utils.cpp \
 	-Iinclude -larmadillo
-
-
-sequential:
-	$(CXX) -std=c++11 -march=native -O3 -Wall -o sequential \
-	src/utils.cpp misc/sequential.cpp \
-	-Iinclude -larmadillo
-
 
 tests:
 	$(CXX) -std=c++11 -march=native -O3 -Wall -o tests \
@@ -17,7 +15,7 @@ tests:
 
 
 all:
-	make pprank sequential tests
+	make sequential pprank tests
 
 clean:
-	rm -f pprank sequential tests
+	rm -f sequential pprank tests
