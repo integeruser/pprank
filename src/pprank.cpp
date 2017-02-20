@@ -46,7 +46,7 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
     MPI_Barrier(MPI_COMM_WORLD);
 
     // ranks computation
-    double start_time, work_time = 0.0, net_time = 0.0;
+    double start_time, work_time = 0.0, netw_time = 0.0;
     uint_fast32_t iterations = 0;
     do {
         ++iterations;
@@ -69,7 +69,7 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         pprank_vec_t prod(N);
         MPI_Allreduce(prod_block.memptr(), prod.memptr(), N, PPRANK_MPI_T, MPI_SUM, MPI_COMM_WORLD);
 
-        net_time += MPI_Wtime()-start_time;
+        netw_time += MPI_Wtime()-start_time;
         ////////////////////////////////////////////////////////////////////////
 
         // update PageRanks
@@ -81,7 +81,7 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         work_time += MPI_Wtime()-start_time;
     }
     while (arma::norm(p_new-p, 1) >= tol);
-    return std::make_tuple(iterations, work_time, net_time, p_new);
+    return std::make_tuple(iterations, work_time, netw_time, p_new);
 }
 
 
@@ -131,17 +131,17 @@ int main(int argc, char *argv[])
     }
 
     uint_fast32_t iterations;
-    double work_time, net_time;
+    double work_time, netw_time;
     pprank_vec_t ranks;
-    std::tie(iterations, work_time, net_time, ranks) = pagerank(tcsr, tol);
+    std::tie(iterations, work_time, netw_time, ranks) = pagerank(tcsr, tol);
 
     if (rank == MASTER) {
         end_time = hrc::now();
         duration = end_time-start_time;
         std::cout << std::fixed << std::setprecision(2);
         std::cout << "[" << iterations << " iterations / " << duration.count() << " s]" << std::endl;
-        std::cout << "        Work time:  " << work_time << " s" << std::endl;
-        std::cout << "        Net time:   " << net_time << " s" << std::endl;
+        std::cout << "        (MASTER) Work time: " << work_time << " s" << std::endl;
+        std::cout << "        (MASTER) Netw time: " << netw_time << " s" << std::endl;
     }
     ////////////////////////////////////////////////////////////////////////////
 
