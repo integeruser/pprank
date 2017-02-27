@@ -34,8 +34,10 @@ std::tuple<uint_fast32_t, pprank_vec_t> pagerank(const TCSR& A, const pprank_t t
         ++iterations;
         p = p_new;
 
-        const pprank_vec_t dangling = arma::sum(p(dangling_nodes))/N * ones;
-        p_new = (1.0-d)/N * ones + d * (A.tdot(p) + dangling);
+        pprank_vec_t At_dot_p = A.tdot(p);
+        At_dot_p += arma::sum(p(dangling_nodes))/N * ones;
+
+        p_new = (1.0-d)/N * ones + d * At_dot_p;
     }
     while (arma::norm(p_new-p, 1) >= tol);
     return std::make_tuple(iterations, p_new);

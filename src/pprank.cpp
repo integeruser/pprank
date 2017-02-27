@@ -66,8 +66,8 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         // each node must receive the contributions from all the others (very heavy!)
         start_time = MPI_Wtime();
 
-        pprank_vec_t prod(N);
-        MPI_Allreduce(prod_block.memptr(), prod.memptr(), N, PPRANK_MPI_T, MPI_SUM, MPI_COMM_WORLD);
+        pprank_vec_t At_dot_p(N);
+        MPI_Allreduce(prod_block.memptr(), At_dot_p.memptr(), N, PPRANK_MPI_T, MPI_SUM, MPI_COMM_WORLD);
 
         netw_time += MPI_Wtime()-start_time;
         ////////////////////////////////////////////////////////////////////////
@@ -75,8 +75,9 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         // update PageRanks
         start_time = MPI_Wtime();
 
-        const pprank_vec_t dangling = arma::sum(p(dangling_nodes))/N * ones;
-        p_new = (1.0-d)/N * ones + d * (prod + dangling);
+        At_dot_p += arma::sum(p(dangling_nodes))/N * ones;
+
+        p_new = (1.0-d)/N * ones + d * At_dot_p;
 
         work_time += MPI_Wtime()-start_time;
     }
