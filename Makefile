@@ -10,7 +10,7 @@ pprank:
 
 tests:
 	$(CXX) -std=c++11 -march=native -O3 -Wall -o tests \
-	src/utils.cpp test/main.cpp \
+	src/utils.cpp src/tests.cpp \
 	-Iinclude -larmadillo
 
 
