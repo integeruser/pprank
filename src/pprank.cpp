@@ -52,9 +52,8 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         // each node calculates a partial result of the matrix-vector product
         start_time = MPI_Wtime();
 
-        const TCSR A_block = tcsrs[rank];
-        const pprank_vec_t subvec = p.subvec(displacements[rank], displacements[rank]+sizes[rank]-1);
-        const pprank_vec_t prod_block = A_block.tdot(subvec);
+        const TCSR A_sub = tcsrs[rank];
+        const pprank_vec_t At_dot_p_sub = A_sub.tdot(p);
 
         work_time += MPI_Wtime()-start_time;
         ////////////////////////////////////////////////////////////////////////
@@ -64,7 +63,7 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         start_time = MPI_Wtime();
 
         pprank_vec_t At_dot_p(N);
-        MPI_Allreduce(prod_block.memptr(), At_dot_p.memptr(), N, PPRANK_MPI_T, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(At_dot_p_sub.memptr(), At_dot_p.memptr(), N, PPRANK_MPI_T, MPI_SUM, MPI_COMM_WORLD);
 
         netw_time += MPI_Wtime()-start_time;
         ////////////////////////////////////////////////////////////////////////

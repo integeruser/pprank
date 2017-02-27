@@ -140,43 +140,44 @@ std::tuple<std::vector<uint_fast32_t>, std::vector<uint_fast32_t>, std::vector<T
     // split the matrix by rows into n submatrices
     assert(0 < n and n <= num_rows);
 
-    std::vector<uint_fast32_t> displacements, rows;
+    std::vector<uint_fast32_t> displacements, sizes;
     std::vector<TCSR> tcsrs;
 
     // compute maximum size of each submatrix
     // note that the last one can have fewer rows than the others
-    const uint_fast32_t num_rows_sub = std::ceil(((pprank_t) num_rows)/n);
+    const uint_fast32_t max_size = std::ceil(((pprank_t) num_rows)/n);
 
     uint_fast32_t i = 1, j = 0;
     uint_fast32_t start = 0, offset = 0;
     do {
-        TCSR tcsr_sub = TCSR();
+        TCSR tcsr;
 
-        tcsr_sub.ia.push_back(0);
+        tcsr.ia.push_back(0);
 
-        for (uint_fast32_t k = 0; i < ia.size() and k < num_rows_sub; ++i, ++k) {
-            tcsr_sub.ia.push_back(ia[i]-start);
+        for (uint_fast32_t k = 0; i < ia.size() and k < max_size; ++i, ++k) {
+            tcsr.ia.push_back(ia[i]-start);
         }
-        start += tcsr_sub.ia.back();
-        assert(((tcsrs.size() < n-1) and tcsr_sub.ia.size() == num_rows_sub+1) or
-               ((tcsrs.size() == n-1) and tcsr_sub.ia.size() <= num_rows_sub+1));
+        start += tcsr.ia.back();
+        assert(((tcsrs.size() < n-1) and tcsr.ia.size() == max_size+1) or
+               ((tcsrs.size() == n-1) and tcsr.ia.size() <= max_size+1));
 
-        for (uint_fast32_t k = 0; k < tcsr_sub.ia.back(); ++j, ++k) {
-            tcsr_sub.a.push_back(a[j]);
-            tcsr_sub.ja.push_back(ja[j]);
+        for (uint_fast32_t k = 0; k < tcsr.ia.back(); ++j, ++k) {
+            tcsr.a.push_back(a[j]);
+            tcsr.ja.push_back(ja[j]);
         }
 
-        tcsr_sub.num_rows = tcsr_sub.ia.size()-1;
-        tcsr_sub.num_cols = num_cols;
+        tcsr.num_rows = tcsr.ia.size()-1;
+        tcsr.num_cols = num_cols;
 
         displacements.push_back(offset);
-        rows.push_back(tcsr_sub.num_rows);
-        tcsrs.push_back(tcsr_sub);
-        offset += num_rows_sub;
+        sizes.push_back(tcsr.num_rows);
+        tcsrs.push_back(tcsr);
+        offset += tcsr.num_rows;
     }
     while (tcsrs.size() < n);
 
     assert(i == ia.size());
     assert(j == a.size() and j == ja.size());
-    return std::make_tuple(displacements, rows, tcsrs);
+    assert(displacements.size() == sizes.size() and sizes.size() == tcsrs.size());
+    return std::make_tuple(displacements, sizes, tcsrs);
 }
