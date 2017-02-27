@@ -36,12 +36,9 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
     p_new.fill(1.0/N);
 
     // partition the matrix in blocks of rows
-    const auto blocks = A.split(num_processes);
-    std::vector<int> blocks_displacements, blocks_num_rows;
-    for (const auto block: blocks) {
-        blocks_displacements.push_back(block.first);
-        blocks_num_rows.push_back(block.second.num_rows);
-    }
+    std::vector<uint_fast32_t> displacements, sizes;
+    std::vector<TCSR> tcsrs;
+    std::tie(displacements, sizes, tcsrs) = A.split(num_processes);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -55,8 +52,8 @@ std::tuple<uint_fast32_t, double, double, pprank_vec_t> pagerank(const TCSR& A, 
         // each node calculates a partial result of the matrix-vector product
         start_time = MPI_Wtime();
 
-        const TCSR A_block = blocks[rank].second;
-        const pprank_vec_t subvec = p.subvec(blocks_displacements[rank], blocks_displacements[rank]+blocks_num_rows[rank]-1);
+        const TCSR A_block = tcsrs[rank];
+        const pprank_vec_t subvec = p.subvec(displacements[rank], displacements[rank]+sizes[rank]-1);
         const pprank_vec_t prod_block = A_block.tdot(subvec);
 
         work_time += MPI_Wtime()-start_time;

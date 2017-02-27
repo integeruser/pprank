@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -30,7 +31,7 @@ struct TCSR {
 
     pprank_vec_t tdot(const pprank_vec_t&) const;
 
-    std::vector<std::pair<uint_fast32_t, TCSR>> split(uint_fast32_t) const;
+    std::tuple<std::vector<uint_fast32_t>, std::vector<uint_fast32_t>, std::vector<TCSR>> split(uint_fast32_t) const;
 };
 
 

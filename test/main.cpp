@@ -1,3 +1,6 @@
+#include <tuple>
+#include <vector>
+
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
@@ -51,88 +54,100 @@ TEST_CASE( "sparse matrix split" )
             const TCSR tcsr = TCSR("inputs/toy-3-2.txt");
 
             SECTION( "1" ) {
-                const std::vector<std::pair<uint_fast32_t, TCSR>> split = tcsr.split(1);
+                std::vector<uint_fast32_t> displacements, sizes;
+                std::vector<TCSR> tcsrs;
+                std::tie(displacements, sizes, tcsrs) = tcsr.split(1);
 
-                REQUIRE(split.size() == 1);
+                REQUIRE(displacements.size() == 1);
+                REQUIRE(sizes.size() == 1);
+                REQUIRE(tcsrs.size() == 1);
 
-                REQUIRE(split[0].second.num_rows == 3);
-                REQUIRE(split[0].second.num_cols == 3);
-                REQUIRE(split[0].second.a == ((const std::vector<pprank_t>) {
+                REQUIRE(tcsrs[0].num_rows == 3);
+                REQUIRE(tcsrs[0].num_cols == 3);
+                REQUIRE(tcsrs[0].a == ((const std::vector<pprank_t>) {
                     1.0, 1.0
                 }));
-                REQUIRE(split[0].second.ia == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[0].ia == ((const std::vector<uint_fast32_t>) {
                     0, 1, 2, 2
                 }));
-                REQUIRE(split[0].second.ja == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[0].ja == ((const std::vector<uint_fast32_t>) {
                     1, 2
                 }));
             }
 
             SECTION( "2" ) {
-                const std::vector<std::pair<uint_fast32_t, TCSR>> split = tcsr.split(2);
+                std::vector<uint_fast32_t> displacements, sizes;
+                std::vector<TCSR> tcsrs;
+                std::tie(displacements, sizes, tcsrs) = tcsr.split(2);
 
-                REQUIRE(split.size() == 2);
+                REQUIRE(displacements.size() == 2);
+                REQUIRE(sizes.size() == 2);
+                REQUIRE(tcsrs.size() == 2);
 
-                REQUIRE(split[0].second.num_rows == 2);
-                REQUIRE(split[0].second.num_cols == 3);
-                REQUIRE(split[0].second.a == ((const std::vector<pprank_t>) {
+                REQUIRE(tcsrs[0].num_rows == 2);
+                REQUIRE(tcsrs[0].num_cols == 3);
+                REQUIRE(tcsrs[0].a == ((const std::vector<pprank_t>) {
                     1.0, 1.0
                 }));
-                REQUIRE(split[0].second.ia == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[0].ia == ((const std::vector<uint_fast32_t>) {
                     0, 1, 2
                 }));
-                REQUIRE(split[0].second.ja == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[0].ja == ((const std::vector<uint_fast32_t>) {
                     1, 2
                 }));
 
-                REQUIRE(split[1].second.num_rows == 1);
-                REQUIRE(split[1].second.num_cols == 3);
-                REQUIRE(split[1].second.a == ((const std::vector<pprank_t>) {
+                REQUIRE(tcsrs[1].num_rows == 1);
+                REQUIRE(tcsrs[1].num_cols == 3);
+                REQUIRE(tcsrs[1].a == ((const std::vector<pprank_t>) {
                 }));
-                REQUIRE(split[1].second.ia == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[1].ia == ((const std::vector<uint_fast32_t>) {
                     0, 0
                 }));
-                REQUIRE(split[1].second.ja == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[1].ja == ((const std::vector<uint_fast32_t>) {
                 }));
             }
 
             SECTION( "3" ) {
-                const std::vector<std::pair<uint_fast32_t, TCSR>> split = tcsr.split(3);
+                std::vector<uint_fast32_t> displacements, sizes;
+                std::vector<TCSR> tcsrs;
+                std::tie(displacements, sizes, tcsrs) = tcsr.split(3);
 
-                REQUIRE(split.size() == 3);
+                REQUIRE(displacements.size() == 3);
+                REQUIRE(sizes.size() == 3);
+                REQUIRE(tcsrs.size() == 3);
 
-                REQUIRE(split[0].second.num_rows == 1);
-                REQUIRE(split[0].second.num_cols == 3);
-                REQUIRE(split[0].second.a == ((const std::vector<pprank_t>) {
+                REQUIRE(tcsrs[0].num_rows == 1);
+                REQUIRE(tcsrs[0].num_cols == 3);
+                REQUIRE(tcsrs[0].a == ((const std::vector<pprank_t>) {
                     1.0
                 }));
-                REQUIRE(split[0].second.ia == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[0].ia == ((const std::vector<uint_fast32_t>) {
                     0, 1
                 }));
-                REQUIRE(split[0].second.ja == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[0].ja == ((const std::vector<uint_fast32_t>) {
                     1
                 }));
 
-                REQUIRE(split[1].second.num_rows == 1);
-                REQUIRE(split[1].second.num_cols == 3);
-                REQUIRE(split[1].second.a == ((const std::vector<pprank_t>) {
+                REQUIRE(tcsrs[1].num_rows == 1);
+                REQUIRE(tcsrs[1].num_cols == 3);
+                REQUIRE(tcsrs[1].a == ((const std::vector<pprank_t>) {
                     1.0
                 }));
-                REQUIRE(split[1].second.ia == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[1].ia == ((const std::vector<uint_fast32_t>) {
                     0, 1
                 }));
-                REQUIRE(split[1].second.ja == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[1].ja == ((const std::vector<uint_fast32_t>) {
                     2
                 }));
 
-                REQUIRE(split[2].second.num_rows == 1);
-                REQUIRE(split[2].second.num_cols == 3);
-                REQUIRE(split[2].second.a == ((const std::vector<pprank_t>) {
+                REQUIRE(tcsrs[2].num_rows == 1);
+                REQUIRE(tcsrs[2].num_cols == 3);
+                REQUIRE(tcsrs[2].a == ((const std::vector<pprank_t>) {
                 }));
-                REQUIRE(split[2].second.ia == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[2].ia == ((const std::vector<uint_fast32_t>) {
                     0, 0
                 }));
-                REQUIRE(split[2].second.ja == ((const std::vector<uint_fast32_t>) {
+                REQUIRE(tcsrs[2].ja == ((const std::vector<uint_fast32_t>) {
                 }));
             }
         }

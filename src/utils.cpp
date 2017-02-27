@@ -5,6 +5,7 @@
 #include <iostream>
 #include <regex>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -134,16 +135,18 @@ pprank_vec_t TCSR::tdot(const pprank_vec_t& vec) const
     return res;
 }
 
-std::vector<std::pair<uint_fast32_t, TCSR>> TCSR::split(uint_fast32_t n) const
+std::tuple<std::vector<uint_fast32_t>, std::vector<uint_fast32_t>, std::vector<TCSR>> TCSR::split(uint_fast32_t n) const
 {
     // split the matrix by rows into n submatrices
     assert(0 < n and n <= num_rows);
+
+    std::vector<uint_fast32_t> displacements, rows;
+    std::vector<TCSR> tcsrs;
 
     // compute maximum size of each submatrix
     // note that the last one can have fewer rows than the others
     const uint_fast32_t num_rows_sub = std::ceil(((pprank_t) num_rows)/n);
 
-    std::vector<std::pair<uint_fast32_t, TCSR>> split;
     uint_fast32_t i = 1, j = 0;
     uint_fast32_t start = 0, offset = 0;
     do {
@@ -155,8 +158,8 @@ std::vector<std::pair<uint_fast32_t, TCSR>> TCSR::split(uint_fast32_t n) const
             tcsr_sub.ia.push_back(ia[i]-start);
         }
         start += tcsr_sub.ia.back();
-        assert(((split.size() < n-1) and tcsr_sub.ia.size() == num_rows_sub+1) or
-               ((split.size() == n-1) and tcsr_sub.ia.size() <= num_rows_sub+1));
+        assert(((tcsrs.size() < n-1) and tcsr_sub.ia.size() == num_rows_sub+1) or
+               ((tcsrs.size() == n-1) and tcsr_sub.ia.size() <= num_rows_sub+1));
 
         for (uint_fast32_t k = 0; k < tcsr_sub.ia.back(); ++j, ++k) {
             tcsr_sub.a.push_back(a[j]);
@@ -166,12 +169,14 @@ std::vector<std::pair<uint_fast32_t, TCSR>> TCSR::split(uint_fast32_t n) const
         tcsr_sub.num_rows = tcsr_sub.ia.size()-1;
         tcsr_sub.num_cols = num_cols;
 
-        split.push_back(std::make_pair(offset, tcsr_sub));
+        displacements.push_back(offset);
+        rows.push_back(tcsr_sub.num_rows);
+        tcsrs.push_back(tcsr_sub);
         offset += num_rows_sub;
     }
-    while (split.size() < n);
+    while (tcsrs.size() < n);
 
     assert(i == ia.size());
     assert(j == a.size() and j == ja.size());
-    return split;
+    return std::make_tuple(displacements, rows, tcsrs);
 }
