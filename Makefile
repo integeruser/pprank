@@ -15,7 +15,7 @@ tests:
 
 
 all:
-	make sequential pprank tests
+	make pprank sequential tests
 
 clean:
-	rm -f sequential pprank tests
+	rm -f pprank sequential tests
