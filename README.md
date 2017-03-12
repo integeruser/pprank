@@ -57,7 +57,7 @@ $ make tests
 g++-6 -std=c++11 -march=native -O3 -Wall -o tests \
 	src/utils.cpp src/tests.cpp \
 	-Iinclude -larmadillo
-~/G/s/u/m/I/h/pprank (master|✔) $ ./tests
+$ ./tests
 ===============================================================================
 All tests passed (45 assertions in 3 test cases)
 ```
