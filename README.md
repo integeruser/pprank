@@ -3,7 +3,7 @@ This repository contains a simple implementation of the [PageRank](https://en.wi
 
 
 ## Requisites
-The code depends on [Armadillo](http://arma.sourceforge.net/) (a linear algebra library) and was tested using [MPICH](https://www.mpich.org/) v3.2.
+The code depends on [Armadillo](http://arma.sourceforge.net/) (a linear algebra library) and was tested using [MPICH](https://www.mpich.org/) 3.2.
 
 On Ubuntu and similar, install these dependencies via apt:
 ```
@@ -51,7 +51,7 @@ As specified in `src/utils.cpp`, the following assumptions are made for the inpu
 
 
 ## Tests
-Results obtained on the [LiveJournal social network data set](http://snap.stanford.edu/data/soc-LiveJournal1.html) using a [MacBook Pro](https://support.apple.com/kb/SP690) with a 2 GHz quad-core Intel Core i7 processor and 8 GB of 1600 MHz DDR3L RAM:
+Results obtained on the [LiveJournal social network data set](http://snap.stanford.edu/data/soc-LiveJournal1.html) using a [MacBook Pro](https://support.apple.com/kb/SP690) (MacOS 10.12.3 - GCC 6.3.0 - MPICH 3.2 - Armadillo 7.700.0) with a 2 GHz quad-core Intel Core i7 processor and 8 GB of 1600 MHz DDR3L RAM:
 ```
 $ md5 ./soc-LiveJournal1-4847571-68993773.txt
 MD5 (./soc-LiveJournal1-4847571-68993773.txt) = 75928465992ef84da938c2ceae74b5dd
@@ -97,7 +97,7 @@ $ mpiexec -n 4 ./pprank ./soc-LiveJournal1-4847571-68993773.txt
 [*] Writing PageRanks to file...[10.65 s]
 ```
 
-Results obtained on the same data set using a cluster of four identical machines connected by a gigabit switch, each equipped with a 3.20 GHz dual-core Intel i3-550 processor and 4 GB of DDR3 RAM:
+Results obtained on the same data set using a cluster of four identical machines (Ubuntu 16.04.1 - GCC 5.4.0 - MPICH 3.2 - Armadillo 6.500.5) connected by a gigabit switch, each equipped with a 3.20 GHz dual-core Intel i3-550 processor and 4 GB of DDR3 RAM:
 ```
 $ md5sum soc-LiveJournal1-4847571-68993773.txt
 75928465992ef84da938c2ceae74b5dd  soc-LiveJournal1-4847571-68993773.txt
