@@ -1,5 +1,5 @@
 # pprank
-This repository contains a simple implementation of the [PageRank](https://en.wikipedia.org/wiki/PageRank) algorithm based on the [MPI](https://en.wikipedia.org/wiki/Message_Passing_Interface) standard. Since PageRank does not scale well on multiple computational nodes for the high volume of data that needs to be exchanged, this project is mostly an academic exercise.
+This repository contains a simple implementation of the [PageRank](https://en.wikipedia.org/wiki/PageRank) algorithm based on the [MPI](https://en.wikipedia.org/wiki/Message_Passing_Interface) standard. Since PageRank does not scale well on multiple computational nodes for the high volume of data exchanged, this project is mostly an academic exercise.
 
 
 ## Requisites
@@ -51,7 +51,7 @@ As specified in `src/utils.cpp`, the following assumptions are made for the inpu
 
 
 ## Misc
-In this repository, I also included a sequential version of PageRank (see `src/sequential.cpp`) and a few tests based on the [Catch](https://github.com/philsquared/Catch) framework:
+In this repository, I also included a sequential version of PageRank which does not require an MPI implementation (see `src/sequential.cpp`) and a few tests based on the [Catch](https://github.com/philsquared/Catch) framework:
 ```
 $ make tests
 g++-6 -std=c++11 -march=native -O3 -Wall -o tests \
