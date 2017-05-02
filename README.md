@@ -50,6 +50,51 @@ As specified in `src/utils.cpp`, the following assumptions are made for the inpu
 - it must end with a newline
 
 
+## Tests
+Results obtained on the [LiveJournal social network data set](http://snap.stanford.edu/data/soc-LiveJournal1.html) using a [MacBook Pro](https://support.apple.com/kb/SP690) with a 2 GHz quad-core Intel Core i7 processor and 8 GB of 1600 MHz DDR3L RAM:
+```
+$ mpiexec -n 1 ./pprank ./soc-LiveJournal1-4847571-68993773.txt
+[*] Building the sparse transition matrix...[7.06 s]
+        Nodes:      4847571
+        Edges:      68993773
+        Dangling:   539119
+[*] Computing PageRanks (tol=1.00e-06)...[51 iterations / 38.78 s]
+        (MASTER) Work time: 33.54 s
+        (MASTER) Netw time: 0.45 s
+[*] Writing PageRanks to file...[9.13 s]
+
+$ mpiexec -n 2 ./pprank ./soc-LiveJournal1-4847571-68993773.txt
+[*] Building the sparse transition matrix...[6.02 s]
+        Nodes:      4847571
+        Edges:      68993773
+        Dangling:   539119
+[*] Computing PageRanks (tol=1.00e-06)...[51 iterations / 36.74 s]
+        (MASTER) Work time: 29.01 s
+        (MASTER) Netw time: 1.10 s
+[*] Writing PageRanks to file...[9.54 s]
+
+$ mpiexec -n 3 ./pprank ./soc-LiveJournal1-4847571-68993773.txt
+[*] Building the sparse transition matrix...[8.83 s]
+        Nodes:      4847571
+        Edges:      68993773
+        Dangling:   539119
+[*] Computing PageRanks (tol=1.00e-06)...[51 iterations / 36.72 s]
+        (MASTER) Work time: 26.74 s
+        (MASTER) Netw time: 1.52 s
+[*] Writing PageRanks to file...[10.06 s]
+
+$ mpiexec -n 4 ./pprank ./soc-LiveJournal1-4847571-68993773.txt
+[*] Building the sparse transition matrix...[7.89 s]
+        Nodes:      4847571
+        Edges:      68993773
+        Dangling:   539119
+[*] Computing PageRanks (tol=1.00e-06)...[51 iterations / 35.29 s]
+        (MASTER) Work time: 23.68 s
+        (MASTER) Netw time: 1.43 s
+[*] Writing PageRanks to file...[10.65 s]
+```
+
+
 ## Misc
 In this repository, I also included a sequential version of PageRank which does not require an MPI implementation (see `src/sequential.cpp`) and a few tests based on the [Catch](https://github.com/philsquared/Catch) framework:
 ```
